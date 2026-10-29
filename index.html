@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">
+<title>닥터빌 제안서 생성기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@700;800&display=swap">
+<style>
+/* Layout: app shell = sticky input panel (left) + live brochure preview (right). Brochure = GDPlus-style editorial page, fixed brand colors. */
+:root{
+  --app-bg:#F2F5F9; --app-panel:#FFFFFF; --app-fg:#0E1B2A; --app-mute:#5B6B7B; --app-line:#D9E1EA;
+  --app-accent:#0085FF; --app-accent-ink:#FFFFFF; --app-field:#F7F9FC; --app-warn-bg:#FFF6E5; --app-warn-fg:#7A4B00;
+  --f-display:"Bebas Neue","Impact","Arial Narrow",sans-serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-logo:"Poppins","Arial Black",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --app-bg:#0B1420; --app-panel:#121E2C; --app-fg:#E6EDF5; --app-mute:#9AAABB; --app-line:#25364A;
+  --app-accent:#3BA2FF; --app-accent-ink:#04121F; --app-field:#0E1926; --app-warn-bg:#2A2110; --app-warn-fg:#F2C97A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --app-bg:#0B1420; --app-panel:#121E2C; --app-fg:#E6EDF5; --app-mute:#9AAABB; --app-line:#25364A;
+  --app-accent:#3BA2FF; --app-accent-ink:#04121F; --app-field:#0E1926; --app-warn-bg:#2A2110; --app-warn-fg:#F2C97A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--app-bg);color:var(--app-fg);font-family:var(--f-body);font-size:14px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--app-panel)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--app-panel);border-bottom:1px solid var(--app-line);
+  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.topbar h1{font-size:15px;margin:0;font-weight:700;display:flex;align-items:center;gap:10px}
+.steps{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.step{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--app-line);color:var(--app-mute)}
+.step.on{border-color:var(--app-accent);color:var(--app-accent);font-weight:700}
+.step.done{background:var(--app-accent);border-color:var(--app-accent);color:var(--app-accent-ink)}
+.shell{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:20px;align-items:start;
+  padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:900px){.shell{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--app-panel);border:1px solid var(--app-line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:18px;min-width:0}
+@media (min-width:901px){.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px);max-height:calc(100vh - 84px);overflow:auto}}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+legend{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--app-accent);margin-bottom:6px;padding:0}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--app-mute);font-weight:500}
+label.f b{color:#E5484D;font-weight:700}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=password],select,textarea{
+  font:inherit;font-size:14px;color:var(--app-fg);background:var(--app-field);border:1px solid var(--app-line);border-radius:6px;padding:8px 10px;width:100%}
+textarea{min-height:92px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--app-accent);outline-offset:1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.checks{display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--app-fg);cursor:pointer}
+.note{font-size:12px;background:var(--app-warn-bg);color:var(--app-warn-fg);border-radius:6px;padding:8px 10px;line-height:1.5}
+.toggle{display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer}
+.toggle small{display:block;color:var(--app-mute);font-size:12px}
+.actions{display:flex;flex-direction:column;gap:8px}
+.btn{font:inherit;font-weight:700;font-size:14px;border-radius:6px;padding:11px 14px;cursor:pointer;border:1px solid var(--app-accent);background:var(--app-accent);color:var(--app-accent-ink);display:flex;justify-content:center;gap:8px}
+.btn.ghost{background:transparent;color:var(--app-accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.status{font-size:12px;color:var(--app-mute);min-height:18px}
+.status.err{color:#E5484D}
+.err-msg{font-size:12px;color:#E5484D}
+.preview-wrap{min-width:0;display:flex;flex-direction:column;gap:10px}
+.preview-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--app-mute)}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--app-warn-bg);color:var(--app-warn-fg)}
+.frame{border:1px solid var(--app-line);border-radius:10px;overflow:hidden;background:#fff}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:#0E1B2A;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:20;max-width:calc(100% - 32px)}
+.logo-up{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--app-mute);flex-wrap:wrap}
+.logo-up button{font:inherit;font-size:12px;background:none;border:1px solid var(--app-line);color:var(--app-fg);border-radius:6px;padding:4px 8px;cursor:pointer}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style id="bro-css">
+/* ===== Brochure (exported as-is) ===== */
+.bro{--navy:#001121;--blue:#0085FF;--ice:#E4EEF7;--ink:#001121;--mute:#55657A;--line:#D5E0EA;--mint:#12D6B0;--paper:#FFFFFF;
+  --fd:"Bebas Neue","Impact","Arial Narrow",sans-serif;--fb:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;--fl:"Poppins","Arial Black",sans-serif;
+  container-type:inline-size;background:var(--paper);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere}
+.bro *{box-sizing:border-box}
+.bro .in{max-width:1180px;margin:0 auto;padding-left:max(20px,4cqi);padding-right:max(20px,4cqi)}
+.bro h2,.bro h3,.bro p{margin:0}
+.bro .logo{display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.bro .logo svg{width:30px;height:30px;flex:none}
+.bro .logo span{font-family:var(--fl);font-weight:800;font-size:22px;color:#1667BE;letter-spacing:-.02em}
+.bro .logo img{height:32px;width:auto;display:block}
+.bro .nav{background:#fff;border-bottom:1px solid var(--line)}
+.bro .nav .in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:14px;flex-wrap:wrap}
+.bro .nav ul{display:flex;gap:22px;list-style:none;margin:0;padding:0;font-family:var(--fd);font-size:20px;letter-spacing:.04em}
+.bro .nav a{color:var(--ink);text-decoration:none}
+.bro .nav a:hover{color:var(--blue)}
+.bro .hero{background:var(--navy);color:#fff;position:relative;overflow:hidden}
+.bro .hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(60% 80% at 85% 10%,rgba(0,133,255,.35),transparent 60%),
+  radial-gradient(40% 60% at 95% 95%,rgba(18,214,176,.18),transparent 60%),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.045) 0 1px,transparent 1px 120px);pointer-events:none}
+.bro .hero .in{position:relative;padding-block:clamp(56px,9cqi,120px) clamp(48px,7cqi,96px);display:flex;flex-direction:column;gap:22px}
+.bro .chip{align-self:flex-start;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:5px 14px;color:#CFE6FF}
+.bro .mega{font-family:var(--fd);font-weight:400;line-height:.9;letter-spacing:.005em;font-size:clamp(52px,11.5cqi,132px);text-wrap:balance}
+.bro .mega .b{color:var(--blue);display:block}
+.bro .hero h2{font-size:clamp(21px,2.6cqi,30px);font-weight:700;line-height:1.4;max-width:30em;text-wrap:balance}
+.bro .hero .lead{color:#B9C8D8;font-size:clamp(15px,1.6cqi,18px);max-width:44em}
+.bro .meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid rgba(255,255,255,.18);margin-top:18px}
+.bro .meta div{padding:16px 16px 0 0;min-width:0}
+.bro .meta dt{font-family:var(--fd);font-size:16px;letter-spacing:.08em;color:#7F93A8}
+.bro .meta dd{margin:2px 0 0;font-weight:700;font-size:17px}
+.bro section{padding-block:clamp(64px,9cqi,112px)}
+.bro .label{font-family:var(--fd);font-weight:400;color:var(--blue);font-size:clamp(56px,9.5cqi,110px);line-height:.88;text-transform:lowercase;letter-spacing:.005em}
+.bro .label-sub{font-size:clamp(18px,2cqi,22px);font-weight:700;margin-top:14px;text-wrap:balance}
+.bro .label-desc{color:var(--mute);margin-top:6px;max-width:44em}
+.bro .two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(28px,5cqi,64px);margin-top:44px;align-items:start}
+.bro .two h3{font-size:clamp(22px,2.6cqi,30px);line-height:1.4;font-weight:900;text-wrap:balance}
+.bro .two .body{color:var(--mute);margin-top:16px;font-size:17px}
+.bro .req{background:var(--ice);padding:28px;display:flex;flex-direction:column;gap:14px}
+.bro .req h4{margin:0;font-family:var(--fd);font-weight:400;font-size:24px;letter-spacing:.04em;color:var(--blue)}
+.bro .req ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:r}
+.bro .req li{counter-increment:r;display:grid;grid-template-columns:34px 1fr;gap:10px;font-weight:500}
+.bro .req li::before{content:counter(r,decimal-leading-zero);font-family:var(--fd);font-size:24px;line-height:1.1;color:var(--blue)}
+.bro .tags{display:flex;gap:6px;flex-wrap:wrap}
+.bro .tag{font-size:12px;font-weight:700;background:#fff;color:var(--ink);border-radius:999px;padding:3px 10px}
+.bro .about{background:var(--ice)}
+.bro .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;margin-top:44px;background:var(--line);border:1px solid var(--line)}
+.bro .stat{background:#fff;padding:26px 22px}
+.bro .stat b{display:block;font-family:var(--fd);font-weight:400;font-size:clamp(40px,5.2cqi,64px);line-height:1;color:var(--blue);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bro .stat span{color:var(--mute);font-size:14px;font-weight:500}
+.bro .demo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3cqi,40px);margin-top:36px}
+.bro .demo h4{margin:0 0 12px;font-size:15px}
+.bro .bar{display:grid;grid-template-columns:72px minmax(0,1fr) 40px;gap:10px;align-items:center;font-size:14px;margin-bottom:8px}
+.bro .bar i{display:block;height:10px;background:#fff;position:relative}
+.bro .bar i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--blue)}
+.bro .bar em{font-style:normal;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.bro .svc{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(24px,4cqi,56px);padding-block:48px;border-top:1px solid var(--line)}
+.bro .svc:first-of-type{margin-top:44px}
+.bro .svc .no{font-family:var(--fd);font-size:20px;letter-spacing:.08em;color:var(--blue)}
+.bro .svc h3{font-size:clamp(26px,3.2cqi,36px);font-weight:900;line-height:1.25;margin-top:2px}
+.bro .svc .sub{color:var(--mute);margin-top:8px}
+.bro .why{display:flex;flex-direction:column;gap:16px;margin-top:26px}
+.bro .why div{display:grid;grid-template-columns:4px 1fr;gap:14px}
+.bro .why div::before{content:"";background:var(--line)}
+.bro .why strong{display:block;font-size:17px}
+.bro .why p{color:var(--mute);font-size:15px}
+.bro .items{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.bro .items span{font-size:13px;border:1px solid var(--line);padding:6px 12px;border-radius:999px}
+.bro .items span b{margin-right:6px}
+.bro .fit{background:var(--navy);color:#fff;padding:30px;display:flex;flex-direction:column;gap:16px;align-self:start}
+.bro .fit .k{font-family:var(--fd);font-size:20px;letter-spacing:.06em;color:#6FB8FF}
+.bro .fit h4{margin:0;font-size:21px;line-height:1.45;font-weight:700;text-wrap:balance}
+.bro .fit ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.bro .fit li{display:grid;grid-template-columns:18px 1fr;gap:8px;color:#D3DEEA;font-size:15px}
+.bro .fit li::before{content:"";width:8px;height:8px;margin-top:9px;background:var(--mint)}
+.bro .band{background:var(--navy);color:#fff;padding-block:clamp(56px,7cqi,88px);position:relative;overflow:hidden}
+.bro .band::before{content:"";position:absolute;inset:0;background:radial-gradient(50% 120% at 0% 50%,rgba(0,133,255,.28),transparent 70%)}
+.bro .band .in{position:relative}
+.bro .band p{font-size:clamp(22px,3cqi,34px);font-weight:900;line-height:1.45;max-width:26em;text-wrap:balance}
+.bro .band small{display:block;margin-top:14px;color:#9FB3C8;font-size:15px}
+.bro .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,2cqi,24px);margin-top:44px}
+.bro .flow div{border-top:2px solid var(--ink);padding-top:16px}
+.bro .flow b{font-family:var(--fd);font-weight:400;font-size:52px;line-height:1;color:var(--blue)}
+.bro .flow h4{margin:8px 0 6px;font-size:18px}
+.bro .flow p{color:var(--mute);font-size:15px}
+.bro .partners{background:var(--ice)}
+.bro .pgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;margin-top:40px;background:var(--line);border:1px solid var(--line)}
+.bro .pgrid span{background:#fff;min-height:84px;display:grid;place-items:center;text-align:center;padding:10px;font-weight:900;color:#6A7B8E;font-size:16px;letter-spacing:-.01em}
+.bro .contact{background:var(--navy);color:#fff;padding-bottom:0}
+.bro .contact .label{color:var(--blue)}
+.bro .cgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4cqi,56px);margin-top:40px}
+.bro .card{border:1px solid rgba(255,255,255,.18);padding:28px;display:flex;flex-direction:column;gap:6px}
+.bro .card .k{font-family:var(--fd);font-size:18px;letter-spacing:.08em;color:#7F93A8}
+.bro .card .n{font-size:26px;font-weight:900}
+.bro .card .o{color:#B9C8D8}
+.bro .card dl{display:grid;grid-template-columns:64px 1fr;gap:6px 12px;margin:14px 0 0;font-size:15px}
+.bro .card dt{color:#7F93A8}
+.bro .card dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.bro .bigmark{font-family:var(--fd);font-weight:400;font-size:clamp(64px,16cqi,210px);line-height:.8;color:rgba(255,255,255,.08);margin-top:56px;white-space:nowrap;overflow:hidden}
+.bro .foot{border-top:1px solid rgba(255,255,255,.12);padding-block:18px;font-size:12px;color:#7F93A8;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bro .sub2{font-size:clamp(20px,2.2cqi,24px);font-weight:900;margin-top:64px;padding-top:40px;border-top:1px solid var(--line)}
+.bro .sub2 small{display:block;font-size:15px;font-weight:500;color:var(--mute);margin-top:4px}
+.bro .tblwrap{overflow-x:auto;margin-top:22px}
+.bro .tbl{width:100%;border-collapse:collapse;font-size:15px;min-width:520px}
+.bro .tbl th{background:var(--navy);color:#fff;text-align:left;padding:11px 14px;font-weight:700;font-size:14px}
+.bro .tbl td{border-bottom:1px solid var(--line);padding:11px 14px;vertical-align:top}
+.bro .tbl td:first-child{font-weight:700;white-space:nowrap}
+.bro .tbl td.num,.bro .tbl th.num{text-align:right;white-space:nowrap}
+.bro .tbl td.num{font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.bro .fine{font-size:12px;color:var(--mute);margin-top:10px}
+.bro .need{border-top:1px solid var(--line)}
+.bro .need .label-desc{font-size:17px;color:var(--ink);margin-top:18px}
+.bro .cards3 ul{margin:4px 0 0;padding-left:18px;color:var(--mute);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.bro .need .tblwrap{margin-top:28px}
+.bro .need .tbl td:nth-child(1){white-space:normal;width:28%}
+.bro .need .tbl td:nth-child(3){color:var(--blue);font-weight:700;width:20%}
+.bro .cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;background:var(--line);border:1px solid var(--line);margin-top:22px}
+.bro .cards3>div{background:#fff;padding:22px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.bro .cards3 .k{font-family:var(--fd);font-size:19px;letter-spacing:.06em;color:var(--blue)}
+.bro .cards3 h4{margin:0;font-size:18px}
+.bro .cards3 p{color:var(--mute);font-size:14px}
+.bro .cards3 .em{font-weight:900;color:var(--ink);font-size:15px;margin-top:auto;padding-top:6px}
+.bro .about .cards3{margin-top:40px}
+.bro .flow.flow5{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:22px}
+.bro .flow .when{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:var(--ice);padding:2px 8px;border-radius:999px;margin-bottom:4px}
+.bro .slots{margin-top:14px;font-weight:700;color:var(--ink)}
+.bro .pgrid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,3cqi,40px);align-items:start}
+@container (max-width:760px){
+  .bro .cards3,.bro .pgrid2{grid-template-columns:minmax(0,1fr)}
+  .bro .flow.flow5{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bro .nav ul{display:none}
+  .bro .meta,.bro .two,.bro .svc,.bro .cgrid,.bro .demo{grid-template-columns:minmax(0,1fr)}
+  .bro .stats,.bro .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bro .pgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@container (max-width:420px){.bro .pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+<header class="topbar">
+  <h1><span id="appLogo"></span>제안서 생성기</h1>
+  <div class="steps" aria-label="진행 단계">
+    <span class="step on" id="st1">1 입력</span><span class="step" id="st2">2 웹브로셔</span><span class="step" id="st3">3 PPT 16:9</span>
+  </div>
+</header>
+
+<div class="shell">
+  <form class="panel" id="form" novalidate>
+    <fieldset>
+      <legend>제안담당자</legend>
+      <div class="row2">
+        <label class="f">이름 <b>*</b><input type="text" id="mName" required autocomplete="name"></label>
+        <label class="f">직함<input type="text" id="mTitle"></label>
+      </div>
+      <label class="f">소속<input type="text" id="mOrg"></label>
+      <div class="row2">
+        <label class="f">이메일 <b>*</b><input type="email" id="mEmail" required></label>
+        <label class="f">연락처<input type="tel" id="mPhone"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>제안처</legend>
+      <label class="f">기관명 <b>*</b><input type="text" id="cName" required></label>
+      <div class="row2">
+        <label class="f">유형<select id="cType">
+          <option>제약사</option><option>의료기기사</option><option>학회</option><option>병원</option><option>기타</option>
+        </select></label>
+        <label class="f">제안일<input type="date" id="pDate"></label>
+      </div>
+      <label class="f">수신 부서 · 담당자<input type="text" id="cDept" placeholder="예: 마케팅본부 PM팀 김OO 과장"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>추가 요구사항</legend>
+      <div class="checks" id="svcChecks">
+        <label><input type="checkbox" value="platform" id="svPlatform"> 플랫폼 광고</label>
+        <label><input type="checkbox" value="webinar" id="svWebinar"> 웹 세미나</label>
+        <label><input type="checkbox" value="conference" id="svConference"> 온/오프라인 컨퍼런스</label>
+      </div>
+      <label class="f">타겟 진료과<input type="text" id="target" placeholder="예: 내과, 가정의학과"></label>
+      <label class="f">요구사항 · 제안 목적 (RFP·메일·통화 메모 원문 붙여넣기 가능)<textarea id="reqs" rows="7"></textarea></label>
+      <label class="toggle"><input type="checkbox" id="useAI" checked>
+        <span>LLM으로 요구사항 분석 · 맞춤 문구 작성<small>원문에서 목표·타겟·KPI를 뽑아 요구사항별 대응 방안을 만들고, 제목·제안 배경·서비스별 포인트를 새로 씁니다. 끄면 기본 문구로 만듭니다.</small></span></label>
+      <label class="toggle"><input type="checkbox" id="svcAuto" checked>
+        <span>분석 결과로 서비스 추천 반영<small>요구사항에 맞는 서비스를 LLM이 추천하면 선택 서비스에 더합니다. 서비스를 하나도 고르지 않아도 됩니다.</small></span></label>
+      <label class="toggle"><input type="checkbox" id="incPrice">
+        <span>광고 단가 포함<small>광고제안서 Price Summary 기준 단가표를 웹브로셔·PPT에 넣습니다. 외부 발송 전 팀장·사업부장 승인을 받으세요.</small></span></label>
+      <div class="logo-up">로고: <span id="logoState">기본 로고</span>
+        <button type="button" id="logoBtn">로고 파일 교체</button><button type="button" id="logoReset" hidden>기본으로</button>
+        <input type="file" id="logoFile" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
+      </div>
+      <p class="note">계약 조건, 단가, 내부 전략, 개인정보는 사내 지침에 따라 팀장·사업부장 승인 후 입력하세요.</p>
+    </fieldset>
+
+    <fieldset id="apiBox">
+      <legend>LLM 연결</legend>
+      <label class="f">엔진<select id="llmEngine">
+        <option value="claude">Claude API (Anthropic)</option>
+        <option value="local">로컬 LLM (Ollama · LM Studio 등 OpenAI 호환)</option>
+      </select></label>
+      <div id="grpClaude" style="display:contents">
+        <label class="f">Claude API 키<input type="password" id="apiKey" autocomplete="off" spellcheck="false" placeholder="sk-ant-..."></label>
+        <label class="f">모델<input type="text" id="apiModel" list="modelList" value="claude-sonnet-5-5" spellcheck="false"><datalist id="modelList"></datalist></label>
+      </div>
+      <div id="grpLocal" style="display:contents" hidden>
+        <label class="f">서버 주소 (OpenAI 호환 /v1)<input type="text" id="localUrl" value="http://localhost:11434/v1" spellcheck="false"></label>
+        <label class="f">모델<input type="text" id="localModel" list="localModelList" placeholder="예: qwen3:14b" spellcheck="false"><datalist id="localModelList"></datalist></label>
+        <label class="f">API 키 (필요한 경우만)<input type="password" id="localKey" autocomplete="off" spellcheck="false"></label>
+      </div>
+      <button type="button" class="btn ghost" id="apiTest" style="padding:8px 10px">연결 확인 · 모델 불러오기</button>
+      <label class="toggle"><input type="checkbox" id="apiRemember">
+        <span>이 브라우저에 설정 기억<small>개인 PC에서만 켜세요. 키는 이 브라우저에만 저장되며 서버·HTML 파일·저장하는 제안서에 들어가지 않습니다.</small></span></label>
+      <p class="status" id="apiState">엔진을 고르고 연결 정보를 입력하세요. 요청은 이 브라우저에서 선택한 LLM으로 직접 전송됩니다.</p>
+    </fieldset>
+
+    <div class="actions">
+      <p class="err-msg" id="err" hidden></p>
+      <button class="btn" type="submit" id="genBtn">웹브로셔 생성</button>
+      <div class="btnrow">
+        <button class="btn ghost" type="button" id="htmlBtn" disabled>HTML 저장</button>
+        <button class="btn ghost" type="button" id="pptBtn" disabled>PPT 생성 (16:9)</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </div>
+  </form>
+
+  <div class="preview-wrap">
+    <div class="preview-head"><span id="pvLabel">웹브로셔 미리보기</span><span class="badge" id="sampleBadge">예시 입력값</span></div>
+    <div class="frame"><div id="preview"></div></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- 원소스 (ojungin.github.io/drville + 닥터빌_광고제안서.pdf) ---------- */
+const SOURCE={
+  stats:[["65,000+","누적 가입자 수"],["18,000+","월 활성 사용자 (MAU)"],["8,000+","일 활성 사용자 (DAU)"],["36+","제휴 파트너사"]],
+  pillars:[["SERVICE 1","CME 학술서비스","라이브세미나/웹심포지엄 · 아카데미 · 학회 콘텐츠 · 최신의학논문 · 브랜드존"],["SERVICE 2","닥터스 파트너스","개원플래너 · 세무·노무·법무 컨설팅 · 장비/인테리어 · 보험심사청구 지원"],["SERVICE 3","커뮤니티 서비스","진단/처방 Q&A · 증례일기 · 취미/일상/재테크 · 월 2,700건 게시글"]],
+  demo:[["주요 연령대",[["40대",37],["30대",28],["50대",24]]],["진료과 TOP 3",[["내과",36],["가정의학과",13],["피부/성형",13]]],["주요 근무지역",[["서울",30],["경기",28],["경상",22]]]],
+  partners:["VIATRIS","Abbott","Lilly","abbvie","Pfizer","Biogen","GSK","BAYER","AstraZeneca","novo nordisk","SK케미칼","대웅제약","현대약품","대한심장학회","삼성서울병원"],
+  partnerLine:"총 36개의 제약사·학회·병원과 함께 연간 600건 이상 행사 운영",
+  process:[["상담 · 요구사항 확인","목표, 타겟 진료과, 일정과 예산 범위를 함께 확인합니다."],["맞춤 기획안 · 견적","서비스 조합, 노출 일정, 운영 범위를 담은 실행안을 드립니다."],["실행 · 운영","광고 노출, 세미나 송출, 행사 현장을 전담 인력이 운영합니다."],["결과 리포트","노출·참석·설문 데이터를 정리해 성과를 보고합니다."]]
+};
+const SERVICES={
+  platform:{en:"PLATFORM AD",name:"플랫폼 광고",sub:"6.5만 명 이상의 의사 회원에게 브랜드와 제품을 직접 알리는 맞춤형 마케팅 솔루션입니다.",
+    why:[["6.5만 의사 회원 정밀 타겟팅","진료과, 지역, 근무 형태 등 세분화된 데이터로 핵심 타겟에게 정확하게 도달합니다."],["회원 주요 동선 노출","로그인 팝업, 메인 배너 A~G, 세미나·브랜드존·출석체크 서브 배너로 노출합니다. 26년 1분기 배너 영역 총 조회수는 738,749회입니다."],["다각화된 마케팅 채널","브랜드존 e-Detailing(UV 약 4,000명·PV 약 12만 회), 아카데미, 서베이, EDM/SMS(도달률 10~13%)까지 통합 운영합니다."]],
+    items:[["메인 배너 A~G","전체 방문 회원 · 월(4주) 단위"],["팝업","로그인 회원 전체 · 1일 단위"],["서브 배너","세미나 상세/목록 · 브랜드존 · 출석체크 A~D"],["브랜드존","e브로셔 · 제품문의 · 동영상 · QUIZ"],["아카데미","질환별 13개 주제 시리즈 콘텐츠"],["서베이 & EDM/SMS","진료과·지역·근무형태 타겟"]]},
+  webinar:{en:"LIVE SEMINAR",name:"웹 세미나",sub:"평균 3,000~3,500명이 참석하고 최대 6,000명이 동시 입장하는 라이브세미나 서비스입니다.",
+    why:[["검증된 참석 규모","점심(12:30~13:00) 약 3,000명, 저녁(18:00~19:00) 약 3,500명이 참석하며 최대 6,000명까지 동시 입장합니다."],["분야별 약 4,000회 운영","제약사 3,961회, 학회 100회, 병원경영 129회, 취미·관심 170회의 운영 경험을 갖췄습니다."],["실시간 소통 · 결과 리포트","실시간 Q&A와 설문을 운영하고, 행사 후 7일 이내 결과 리포트를 전달합니다."]],
+    items:[["1인 웨비나","닥터빌 촬영·송출 · 1인 강의"],["3인 웹심포지엄","닥터빌 촬영·송출 · 강의·토론"],["Streaming ONLY","자체 촬영 · 닥터빌 동시송출"],["시리즈 운영","WEEK · 회원 참여형 · 학회 연계"]]},
+  conference:{en:"CONFERENCE",name:"온/오프라인 컨퍼런스",sub:"의학 행사의 새로운 표준, 컨퍼런스빌. 엠서클 전 조직이 함께 행사를 운영합니다.",
+    why:[["전사 통합 인프라","닥터빌·하이닥·컨퍼런스빌이 기획, 홍보, 미디어, 현장 운영, 디자인을 하나의 체계로 제공합니다."],["강력한 타겟 홍보","6.5만 회원 대상 배너/EDM과 하이닥 보도자료, 외부 매체 송출로 참석자를 모객합니다."],["검증된 경험","6년간 400건 이상의 행사와 10건 이상의 대규모 국제학술대회를 운영했습니다."]],
+    items:[["온라인 행사","고화질 스트리밍 · Q&A · 투표 · 평점 연동"],["오프라인 행사","장소 섭외 · 키비주얼 · 등록 · 현장 총괄"],["하이브리드 행사","동시 생중계 · Zoom 해외 연자 · AI 번역 자막"]]}
+};
+const ORDER=["platform","webinar","conference"];
+/* ---------- 광고제안서 상세 (닥터빌_광고제안서.pdf) ---------- */
+const ADS={lead:"6.5만 명 이상의 의사 회원에게 직접 도달합니다.",
+  rows:[["메인페이지 배너 (A~G)","전체 방문 회원","가장 넓은 노출, 위치별 단가"],["팝업 광고","로그인 회원 전체","최고 가시성, 1일 단위 운영"],["라이브세미나 / 웨비나","진료과별 타겟","1,000~6,000명 참석자 보장"],["브랜드존 e-Detailing","UV 약 4,000명 / PV 약 12만 회","제품 Key Message 전달"],["서베이 (Survey)","진료과 / 지역 / 근무형태 타겟","신제품 조사 / 제품 홍보"],["EDM / SMS 홍보","타겟 세그먼트","도달률 10~13%"],["닥터빌 아카데미","질환별 관심 회원","연속 시리즈 학술 콘텐츠 (13개 주제)"]],
+  note:"배너: 26년 1분기 활성사용자 8,818명 / 총 조회수 738,749회 · 브랜드존·EDM 수치: 25년 12월 기준"};
+const SEMINAR={slots:"점심 12:30~13:00 약 3,000명 · 저녁 18:00~19:00 약 3,500명 · 최대 6,000명 동시 입장",
+  formats:[["WEBINAR","1인 웨비나","닥터빌 촬영·송출 / 1인 강의 형식","5,000,000","6,500,000~"],["WEB SYMPOSIUM","3인 웹심포지엄","닥터빌 촬영·송출 / 3인 강의·토론 형식","7,000,000","8,500,000~"],["STREAMING ONLY","Streaming 전용","제약사 자체 촬영·송출 / 닥터빌 동시송출","4,000,000","5,500,000~"]],
+  series:[["WEEK","WEEK 웹심포지엄","일주일간 특정 제품 관련 강의를 집중 운영","주 5~7회"],["MEMBER","회원 참여형","닥터빌 회원 대상 증례 접수 후 선별해 강의 구성","월 1회"],["SOCIETY","학회와 함께하는","학회와 제약사가 함께 특정 제품 관련 강의 구성","연 6회"]],
+  steps:[["기획·편성","2~3개월 전","주제·일정 확정"],["아젠다 수립","1개월 전","연자 섭외·확정"],["행사 준비","1개월 전","디자인·페이지 제작"],["행사 운영","행사 당일","촬영·송출·Q&A"],["결과 보고","7일 이내","리포트 전달"]]};
+const PRICE={
+  platform:[["메인배너","위치 A / B / C","1개월","4,000,000"],["메인배너","위치 E / F / G","1개월","2,000,000"],["메인배너","팝업","1일","500,000"],["서브배너","세미나 상세 A","1개월","4,000,000"],["서브배너","세미나 상세 B","1개월","3,000,000"],["서브배너","세미나 목록 A/B","1개월","2,000,000"],["서브배너","세미나 목록 C/D","1개월","1,000,000"],["서브배너","브랜드존 의약품 A","1개월","2,000,000"],["서브배너","브랜드존 퀴즈","1회","3,500,000"],["서브배너","출석체크 A/B/C/D","각 1개월","1,000,000"],["서베이","운영비 (참석자 1,000명 기준, 리워드 별도)","1종·1회","15,000,000"],["EDM","5,000명 미만","발송","800,000"],["EDM","5,001~9,999명","발송","1,500,000"],["EDM","10,000명 이상","발송","2,000,000"],["SMS","대상자 수 무관 (수신동의자 한정)","1회","2,000,000"]],
+  webinar:[["라이브세미나","1인 웨비나 Basic","건당","5,000,000"],["라이브세미나","1인 웨비나 Option","건당","6,500,000~"],["라이브세미나","3인 웹심포지엄 Basic","건당","7,000,000"],["라이브세미나","3인 웹심포지엄 Option","건당","8,500,000~"],["라이브세미나","Streaming ONLY Basic","건당","4,000,000"],["라이브세미나","Streaming ONLY Option","건당","5,500,000~"],["라이브세미나","참가자 추가 (1,000명당)","건당","1,500,000"]],
+  note:"* 모든 금액 VAT 별도 / 광고 위치 및 수량에 따라 변동 가능 / 상세 견적은 별도 협의 / 배너 A~G: 월(4주), 팝업: 1일 기준"};
+const TYPES={
+  "제약사":{goal:"신제품 런칭과 브랜드 인지도 제고",rec:["platform","webinar"],
+    fit:{platform:["진료과 타겟팅 팝업·배너로 처방 대상 의사에게 노출 집중","브랜드존 e-Detailing으로 제품 Key Message 반복 학습","EDM/SMS로 런칭 심포지엄 초청과 사후 리마인드"],
+         webinar:["제품 런칭 웹심포지엄을 기획부터 송출까지 원스톱 운영","Delegate Boosting으로 타겟 진료과 참석자 확보","참석자 통계·설문 리포트로 마케팅 성과 측정"],
+         conference:["오프라인 심포지엄과 온라인 생중계를 결합한 하이브리드 운영","브랜드 일관성을 갖춘 키비주얼·포토월 제작","닥터빌·하이닥 연계 사전 홍보로 모객"]}},
+  "의료기기사":{goal:"제품 이해도 제고와 사용 경험 확산",rec:["platform","webinar"],
+    fit:{platform:["브랜드존에 시연 영상·e-Brochure를 게재해 제품 이해도 제고","관련 진료과 대상 배너·팝업으로 신제품 출시 알림","의사 전용 서베이로 사용 의향과 니즈 데이터 확보"],
+         webinar:["제품 시연과 임상 적용 사례 중심의 라이브 웨비나","실시간 Q&A로 사용 현장의 질문에 즉시 응답","VOD 다시보기로 시연 콘텐츠를 지속 활용"],
+         conference:["핸즈온 세션을 포함한 오프라인 행사 공간 기획","현장 강연 동시 생중계로 참여 범위 확대","등록부터 현장 운영까지 전문 인력 지원"]}},
+  "학회":{goal:"학술대회 참석률과 회원 참여 확대",rec:["conference","webinar"],
+    fit:{platform:["학술대회 일정에 맞춘 메인 배너·팝업 홍보","회원 대상 EDM/SMS로 사전 등록 독려","행사 후 서베이로 만족도와 개선점 확인"],
+         webinar:["연수강좌를 온라인으로 열어 지역 제약 없는 참여 확보","연수평점 관리와 출결 처리를 플랫폼에서 일괄 지원","VOD로 학술 콘텐츠의 다시보기 제공"],
+         conference:["학술대회 장소 섭외부터 등록, 현장 총괄까지 대행","Zoom 연동 해외 연자 참여와 AI 번역·자막 지원","닥터빌 6.5만 회원 대상 Delegate Boosting으로 모객"]}},
+  "병원":{goal:"의료진 대상 병원 브랜드와 학술 역량 홍보",rec:["webinar","platform"],
+    fit:{platform:["진료 협력 대상 진료과·지역에 배너 노출","병원 소개 브랜드존으로 전문 센터와 의료진 소개","EDM으로 심포지엄·연수강좌 일정 안내"],
+         webinar:["병원 주관 웹 심포지엄으로 학술 역량 홍보","협력 의원 대상 케이스 컨퍼런스 온라인 운영","참석자 데이터로 협력 네트워크 현황 파악"],
+         conference:["개원 기념·연례 심포지엄 등 병원 행사 운영 대행","현장 강연 동시 생중계로 원외 참여 확대","행사 제작물과 현장 운영 일괄 지원"]}},
+  "기타":{goal:"의료 전문가 대상 인지도와 참여 확대",rec:["platform","webinar"],
+    fit:{platform:["타겟 진료과·지역에 맞춘 배너와 팝업 노출","브랜드존으로 핵심 메시지와 자료 제공","서베이·EDM으로 의사 회원의 반응 확인"],
+         webinar:["주제에 맞춘 라이브 웨비나 기획과 연자 구성","Delegate Boosting으로 참석자 확보","참석자 통계·설문 결과 리포트 제공"],
+         conference:["행사 규모에 맞는 장소와 공간 기획","온/오프라인 동시 운영으로 참여 범위 확대","사전 홍보부터 결과 보고까지 원스톱 운영"]}}
+};
+
+/* ---------- helpers ---------- */
+function hasBatchim(w){const c=String(w).trim().slice(-1).charCodeAt(0);if(c>=0xAC00&&c<=0xD7A3)return (c-0xAC00)%28!==0;return /[a-z0-9]$/i.test(w)?!/[aeiouy]$/i.test(w):false}
+const j=(w,a,b)=>w+(hasBatchim(w)?a:b);
+function fmtDate(v){if(!v)return"";const[y,m,d]=v.split("-");return `${y}.${m}.${d}`}
+function today(){const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+const ICON_SVG=`<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="dvg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00C2FF"/><stop offset="1" stop-color="#14E0A8"/></linearGradient></defs><path d="M24 2a22 22 0 1 1-15.6 37.6L3 45l2.6-7.4A22 22 0 0 1 24 2z" fill="url(#dvg)"/><circle cx="24" cy="24" r="12.5" fill="#fff"/><path d="M21.6 17h4.8v4.6H31v4.8h-4.6V31h-4.8v-4.6H17v-4.8h4.6z" fill="#13C9B5"/></svg>`;
+let customLogo=null; // {url,w,h}
+function logoHTML(){return customLogo?`<span class="logo"><img src="${customLogo.url}" alt="닥터빌"></span>`:`<span class="logo">${ICON_SVG}<span>Dr.Ville</span></span>`}
+$("appLogo").innerHTML=`<span class="bro" style="background:none;container-type:normal">${logoHTML()}</span>`;
+
+/* ---------- form state ---------- */
+const EXAMPLE={mName:"오정인",mTitle:"팀장",mOrg:"엠서클 닥터빌 콘텐츠운영팀",mEmail:"ojungin@mcircle.biz",mPhone:"",
+  cName:"(예시) 한빛제약",cType:"제약사",cDept:"마케팅본부 PM팀",target:"내과, 가정의학과",
+  reqs:"하반기 신규 당뇨 복합제 런칭을 앞두고 있습니다.\n내과·가정의학과 개원의를 대상으로 런칭 초기 3개월간 제품 인지도를 빠르게 높이고 싶습니다.\n런칭 웹심포지엄은 참석자 2,000명 이상을 목표로 하며, 이후에도 제품 정보를 꾸준히 노출할 채널이 필요합니다.\n심포지엄 후 참석 의사들의 처방 의향도 확인하고 싶습니다.",svc:["platform","webinar"],price:false};
+function fill(v){for(const k of["mName","mTitle","mOrg","mEmail","mPhone","cName","cDept","target","reqs"])$(k).value=v[k]||"";$("cType").value=v.cType;$("pDate").value=today();$("incPrice").checked=!!v.price;
+  document.querySelectorAll("#svcChecks input").forEach(c=>c.checked=v.svc.includes(c.value))}
+function read(){const svc=[...document.querySelectorAll("#svcChecks input:checked")].map(c=>c.value);
+  return{useAI:$("useAI").checked,svcAuto:$("svcAuto").checked,manager:{name:$("mName").value.trim(),title:$("mTitle").value.trim(),org:$("mOrg").value.trim(),email:$("mEmail").value.trim(),phone:$("mPhone").value.trim()},
+    client:{name:$("cName").value.trim(),type:$("cType").value,dept:$("cDept").value.trim()},date:$("pDate").value||today(),
+    target:$("target").value.trim(),price:$("incPrice").checked,raw:$("reqs").value.trim(),picked:svc.slice(),reqs:$("reqs").value.split(/\n+/).map(s=>s.replace(/^[\s\-•·*\d.)]+/,"").trim()).filter(Boolean),svc}}
+function validate(d){const e=[];if(!d.manager.name)e.push("제안담당자 이름");if(!/^\S+@\S+\.\S+$/.test(d.manager.email))e.push("담당자 이메일");if(!d.client.name)e.push("제안처 기관명");if(!d.svc.length&&!(d.useAI&&d.svcAuto))e.push("제안 서비스(1개 이상)");return e}
+
+/* ---------- model ---------- */
+function baseModel(d){
+  const t=TYPES[d.client.type]||TYPES["기타"],c=d.client.name,svcNames=d.svc.map(k=>SERVICES[k].name).join(", ");
+  const tg=d.target?`${d.target} 의사 회원을 중심으로 `:"";
+  return{input:d,
+    heroTitle:`${j(c,"과","와")} 함께하는 ${t.goal}, 닥터빌이 6만 5천 의사 회원과 함께합니다.`,
+    heroLead:`의료 전문가 전용 지식공유 플랫폼 닥터빌이 ${c}만을 위한 ${svcNames} 실행안을 제안드립니다.`,
+    introHeadline:`${c} 맞춤 제안`,
+    introBody:`닥터빌은 6만 5천 명 이상의 의사 회원이 가입하고 매일 8,000명 이상이 방문하는 국내 최대 규모의 프리미엄 의료 플랫폼입니다. ${tg}${c}의 ${t.goal}을 위해 ${j(svcNames,"을","를")} 결합한 실행안을 준비했습니다.`,
+    introBullets:(d.reqs.length?d.reqs:[t.goal,"타겟 진료과 중심의 정밀 노출","데이터 기반 성과 리포트"]).slice(0,4),
+    statement:`의사가 매일 찾는 공간에서, ${c}의 메시지가 가장 정확하게 닿습니다.`,
+    services:Object.fromEntries(d.svc.map(k=>[k,{headline:`${j(c,"을","를")} 위한 ${SERVICES[k].name} 활용 포인트`,fit:t.fit[k].slice()}])),
+    process:SOURCE.process.map(p=>p[1]),ai:false};
+}
+
+/* ---------- brochure render ---------- */
+function insightHTML(m){const a=m.analysis;if(!a)return"";const li=x=>x.length?`<ul>${x.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`:`<p>제안 협의 시 함께 설정합니다.</p>`;
+  return `<section class="need" id="bro-need"><div class="in"><h2 class="label">insight</h2><p class="label-sub">요구사항 분석 및 대응 방안</p>
+    ${a.summary?`<p class="label-desc">${esc(a.summary)}</p>`:""}
+    <div class="cards3"><div><span class="k">OBJECTIVE</span><h4>목표</h4>${li(a.objectives)}</div><div><span class="k">TARGET</span><h4>타겟</h4>${li(a.targets)}</div><div><span class="k">KPI</span><h4>목표 지표</h4>${li(a.kpis)}</div></div>
+    ${m.reqMap&&m.reqMap.length?tbl(["요구사항","닥터빌 대응 방안","활용 상품"],m.reqMap.map(x=>[x.need,x.solution,x.product]),-1):""}
+    ${m.recReason?`<p class="fine">추천 서비스 근거: ${esc(m.recReason)}</p>`:""}</div></section>`}
+function priceRows(d){return d.svc.filter(k=>PRICE[k]).map(k=>[k,PRICE[k]])}
+function tbl(head,rows,numCol){return `<div class="tblwrap"><table class="tbl"><thead><tr>${head.map((h,i)=>`<th${i===numCol?' class="num"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((x,i)=>`<td${i===numCol?' class="num"':""}>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`}
+function detailHTML(d){let h="";
+  if(d.svc.includes("platform"))h+=`<h3 class="sub2">광고 상품 안내<small>${ADS.lead}</small></h3>${tbl(["광고 상품","도달 타겟","특징"],ADS.rows,-1)}<p class="fine">${ADS.note}</p>`;
+  if(d.svc.includes("webinar"))h+=`<h3 class="sub2">라이브세미나 운영 유형<small>연속성을 지닌 시리즈 웹심포지엄과 표준 운영 프로세스</small></h3>
+    <p class="slots">${SEMINAR.slots}</p>
+    <div class="cards3">${SEMINAR.formats.map(f=>`<div><span class="k">${f[0]}</span><h4>${f[1]}</h4><p>${f[2]}</p>${d.price?`<span class="em">Basic ${f[3]}원 · Option ${f[4]}원</span>`:""}</div>`).join("")}</div>
+    ${d.price?`<p class="fine">* VAT 별도</p>`:""}
+    <div class="cards3">${SEMINAR.series.map(f=>`<div><span class="k">${f[0]}</span><h4>${f[1]}</h4><p>${f[2]}</p><span class="em">${f[3]}</span></div>`).join("")}</div>
+    <div class="flow flow5">${SEMINAR.steps.map((p,i)=>`<div><b>${i+1}</b><h4>${p[0]}</h4><span class="when">${p[1]}</span><p>${p[2]}</p></div>`).join("")}</div>`;
+  return h}
+function priceHTML(d){const g=priceRows(d);const lab={platform:"플랫폼 광고",webinar:"라이브세미나"};
+  return `<section id="bro-price"><div class="in"><h2 class="label">price</h2><p class="label-sub">광고 단가 요약</p>
+    ${g.length?`<div>${g.map(([k,rows])=>`<div><h3 class="sub2" style="margin-top:32px;padding-top:0;border:0">${lab[k]}</h3>${tbl(["분류","상품명","기준","단가 (원)"],rows,3)}</div>`).join("")}</div>`:""}
+    ${d.svc.includes("conference")?`<p class="label-desc" style="margin-top:24px">온/오프라인 컨퍼런스는 행사 규모와 운영 범위에 따라 별도 견적으로 안내드립니다.</p>`:""}
+    <p class="fine">${PRICE.note}</p></div></section>`}
+function brochureHTML(m){
+  const d=m.input,c=esc(d.client.name),mg=d.manager;
+  const svcHTML=d.svc.map((k,i)=>{const s=SERVICES[k],f=m.services[k];return `
+    <div class="svc">
+      <div><div class="no">SERVICE ${String(i+1).padStart(2,"0")} · ${s.en}</div><h3>${esc(s.name)}</h3><p class="sub">${esc(s.sub)}</p>
+        <div class="why">${s.why.map(w=>`<div><span><strong>${esc(w[0])}</strong><p>${esc(w[1])}</p></span></div>`).join("")}</div>
+        <div class="items">${s.items.map(it=>`<span><b>${esc(it[0])}</b>${esc(it[1])}</span>`).join("")}</div></div>
+      <aside class="fit"><span class="k">FOR ${c}</span><h4>${esc(f.headline)}</h4><ul>${f.fit.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></aside>
+    </div>`}).join("");
+  return `<div class="bro">
+  <nav class="nav"><div class="in">${logoHTML()}<ul><li><a href="#bro-why">Proposal</a></li>${m.analysis?`<li><a href="#bro-need">Insight</a></li>`:""}<li><a href="#bro-about">About</a></li><li><a href="#bro-svc">Services</a></li><li><a href="#bro-flow">Process</a></li><li><a href="#bro-contact">Contact</a></li></ul></div></nav>
+  <header class="hero"><div class="in">
+    <span class="chip">${esc(d.client.type)} 맞춤 제안 · ${fmtDate(d.date)}</span>
+    <h1 class="mega">Connect with<span class="b">65,000 doctors</span></h1>
+    <h2>${esc(m.heroTitle)}</h2><p class="lead">${esc(m.heroLead)}</p>
+    <dl class="meta"><div><dt>Client</dt><dd>${c}${d.client.dept?` <span style="font-weight:400;color:#B9C8D8">· ${esc(d.client.dept)}</span>`:""}</dd></div>
+      <div><dt>Proposed by</dt><dd>${esc(mg.name)} ${esc(mg.title)}</dd></div><div><dt>Date</dt><dd>${fmtDate(d.date)}</dd></div></dl>
+  </div></header>
+  <section id="bro-why"><div class="in">
+    <h2 class="label">proposal</h2><p class="label-sub">제안 배경</p>
+    <div class="two"><div><h3>${esc(m.introHeadline)}</h3><p class="body">${esc(m.introBody)}</p></div>
+      <div class="req"><h4>Key points for ${c}</h4><ol>${m.introBullets.map(b=>`<li><span>${esc(b)}</span></li>`).join("")}</ol>
+        ${d.target||d.svc.length?`<div class="tags">${d.target?d.target.split(/[,，]/).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join(""):""}${d.svc.map(k=>`<span class="tag">${esc(SERVICES[k].name)}</span>`).join("")}</div>`:""}</div></div>
+  </div></section>
+  ${insightHTML(m)}
+  <section class="about" id="bro-about"><div class="in">
+    <h2 class="label">about us</h2><p class="label-sub">국내 최대 규모의 프리미엄 의료 플랫폼</p>
+    <p class="label-desc">닥터빌은 단순 가입자 증가를 넘어 현장의 목소리가 콘텐츠가 되는 생태계를 만들고 있습니다. 가장 활발하게 소통하는 공간에서 6만 5천 명 이상의 의사 회원과 함께합니다.</p>
+    <div class="stats">${SOURCE.stats.map(s=>`<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join("")}</div>
+    <div class="demo">${SOURCE.demo.map(g=>`<div><h4>${g[0]}</h4>${g[1].map(r=>`<div class="bar"><span>${r[0]}</span><i style="--w:${Math.round(r[1]/40*100)}%"></i><em>${r[1]}%</em></div>`).join("")}</div>`).join("")}</div>
+    <div class="cards3">${SOURCE.pillars.map(p=>`<div><span class="k">${p[0]}</span><h4>${p[1]}</h4><p>${p[2]}</p></div>`).join("")}</div>
+  </div></section>
+  <section id="bro-svc"><div class="in"><h2 class="label">our services</h2><p class="label-sub">${c} 제안 서비스</p>${svcHTML}${detailHTML(d)}</div></section>
+  <div class="band"><div class="in"><p>${esc(m.statement)}</p><small>의료 전문가에게 필요한 모든 콘텐츠가 모이는 곳, 닥터빌</small></div></div>
+  <section id="bro-flow"><div class="in"><h2 class="label">how to work</h2><p class="label-sub">진행 프로세스</p>
+    <div class="flow">${SOURCE.process.map((p,i)=>`<div><b>${String(i+1).padStart(2,"0")}</b><h4>${p[0]}</h4><p>${esc(m.process[i]||p[1])}</p></div>`).join("")}</div></div></section>
+  ${d.price?priceHTML(d):""}
+  <section class="partners"><div class="in"><h2 class="label">our partners</h2><p class="label-sub">${SOURCE.partnerLine}</p>
+    <div class="pgrid">${SOURCE.partners.map(p=>`<span>${p}</span>`).join("")}</div></div></section>
+  <section class="contact" id="bro-contact"><div class="in"><h2 class="label">contact</h2><p class="label-sub">다음 단계를 함께 논의하겠습니다</p>
+    <div class="cgrid">
+      <div class="card"><span class="k">Proposed by</span><span class="n">${esc(mg.name)} ${esc(mg.title)}</span><span class="o">${esc(mg.org)}</span>
+        <dl><dt>이메일</dt><dd>${esc(mg.email)}</dd>${mg.phone?`<dt>연락처</dt><dd>${esc(mg.phone)}</dd>`:""}</dl></div>
+      <div class="card"><span class="k">Prepared for</span><span class="n">${c}</span><span class="o">${esc(d.client.dept||d.client.type)}</span>
+        <dl><dt>제안일</dt><dd>${fmtDate(d.date)}</dd><dt>서비스</dt><dd>${esc(d.svc.map(k=>SERVICES[k].name).join(", "))}</dd></dl></div>
+    </div>
+    <div class="bigmark">Doctor Ville</div>
+    <div class="foot"><span>의료 전문가에게 필요한 모든 콘텐츠가 모이는 곳, 닥터빌 · 엠서클</span><span>© 2026 Doctor Ville. All rights reserved.</span></div>
+  </div></section>
+</div>`;}
+
+/* ---------- AI copy (sample capability) ---------- */
+const sampleP=(window.claude&&window.claude.use)?window.claude.use("sample"):Promise.resolve(null);
+const downloadsP=(window.claude&&window.claude.use)?window.claude.use("downloads"):Promise.resolve(null);
+function svcFacts(k){const s=SERVICES[k];return `- [${k}] ${s.name}: ${s.sub} / ${s.why.map(w=>w[0]+": "+w[1]).join(" / ")} / 상품: ${s.items.map(i=>i[0]+"("+i[1]+")").join(", ")}`}
+function aiPrompt(m){const d=m.input,keys=ORDER.map(k=>`"${k}"`).join(" | ");
+  return `당신은 의사 전용 플랫폼 '닥터빌'(운영사 엠서클)의 B2B 제안 컨설턴트이자 카피라이터입니다.
+먼저 제안처의 요구사항 원문을 분석하고, 그 결과를 반영해 제안서 문구를 한국어로 작성하세요. 아래 입력과 사실만 사용합니다.
+
+[제안처] ${d.client.name} (유형: ${d.client.type}${d.client.dept?", 수신: "+d.client.dept:""})
+[타겟 진료과 입력값] ${d.target||"지정 없음"}
+[담당자가 선택한 서비스] ${d.picked.length?d.picked.map(k=>SERVICES[k].name+"("+k+")").join(", "):"선택 없음 — 요구사항에 맞게 추천 필요"}
+[요구사항 원문]
+"""
+${d.raw||"별도 요구사항 없음"}
+"""
+
+[닥터빌 서비스 사실]
+${ORDER.map(svcFacts).join("\n")}
+[광고 상품] ${ADS.rows.map(r=>r[0]+"("+r[1]+", "+r[2]+")").join(" / ")}
+[라이브세미나] ${SEMINAR.slots} / 유형: ${SEMINAR.formats.map(f=>f[1]+"("+f[2]+")").join(", ")} / 시리즈: ${SEMINAR.series.map(f=>f[1]+" "+f[3]).join(", ")}
+[닥터빌 공통 사실] 누적 가입자 65,000명 이상, MAU 18,000 이상, DAU 8,000 이상, 제휴 파트너사 36곳 이상, 커뮤니티 월 2,700건 게시글, 연간 600건 이상 행사 운영, 회원 연령 40대 37%·30대 28%·50대 24%, 진료과 내과 36%·가정의학과 13%·피부/성형 13%, 지역 서울 30%·경기 28%·경상 22%.
+
+규칙:
+- 위에 없는 수치·실적·고객사·가격·할인·계약 조건을 만들지 마세요. 원문에 있는 목표 수치는 '목표'로만 언급하세요.
+- kpis에는 원문에 나온 목표 수치·지표만 넣고, 없으면 빈 배열로 두세요.
+- reqMap의 need는 원문 내용을 요약한 것이어야 하며, solution과 product는 위 서비스·상품 사실 안에서만 고르세요.
+- recommend에는 요구사항 달성에 필요한 서비스 키만 넣으세요(${keys}). 담당자가 선택한 서비스가 맞지 않아도 빼지 말고 그대로 두세요.
+- services에는 담당자 선택 서비스와 recommend 서비스를 모두 포함하세요.
+- 존댓말 '~합니다/~드립니다'체. 과장 표현 남발 금지. 이모지 금지. 글자 수 제한(공백 포함)을 지키세요.
+
+JSON만 출력하세요:
+{"analysis":{"summary":"요구사항 핵심 요약 2문장, 120자 이내","objectives":["제안처 목표 2~4개, 각 30자 이내"],"targets":["타겟 고객·진료과·지역 1~3개, 각 30자 이내"],"kpis":["원문 목표 지표 0~3개, 각 30자 이내"]},
+ "reqMap":[{"need":"요구사항 30자 이내","solution":"닥터빌 대응 방안 60자 이내","product":"활용 상품명 20자 이내"}],
+ "recommend":[${keys}],
+ "recReason":"추천 근거 한 문장, 60자 이내",
+ "heroTitle":"제안 핵심 한 문장, 45자 이내",
+ "heroLead":"2문장, 110자 이내",
+ "introHeadline":"제안 배경 제목, 30자 이내",
+ "introBody":"분석 결과를 반영한 제안 배경, 3문장, 230자 이내",
+ "introBullets":["핵심 포인트 3~4개, 각 40자 이내"],
+ "statement":"브로셔 중간 메시지 한 문장, 50자 이내",
+ "services":{"<서비스 키>":{"headline":"이 서비스를 제안처에 어떻게 쓰는지 한 문장, 40자 이내","fit":["제안처 맞춤 실행 포인트 3개, 각 45자 이내"]}},
+ "process":["4단계(상담·요구사항 확인 / 맞춤 기획안·견적 / 실행·운영 / 결과 리포트) 각각의 맞춤 설명 4개, 각 50자 이내"]}
+reqMap은 3~5개로 작성하세요.`;}
+const str=(v,max)=>typeof v==="string"&&v.trim()?v.trim().slice(0,max):null;
+const arr=(v,n,max)=>Array.isArray(v)?v.map(x=>str(x,max)).filter(Boolean).slice(0,n):[];
+function merge(m,o){if(!o||typeof o!=="object")return m;const d=m.input,t=TYPES[d.client.type]||TYPES["기타"];
+  const rec=Array.isArray(o.recommend)?o.recommend.filter(k=>ORDER.includes(k)):[];
+  let svc=d.picked.slice();if(d.svcAuto)svc=ORDER.filter(k=>svc.includes(k)||rec.includes(k));if(!svc.length)svc=d.svc.slice();
+  const r={...m,input:{...d,svc},services:{},ai:true,added:svc.filter(k=>!d.picked.includes(k))};
+  r.heroTitle=str(o.heroTitle,70)||m.heroTitle;r.heroLead=str(o.heroLead,160)||m.heroLead;r.introHeadline=str(o.introHeadline,45)||m.introHeadline;
+  r.introBody=str(o.introBody,320)||m.introBody;const b=arr(o.introBullets,4,60);if(b.length>=2)r.introBullets=b;r.statement=str(o.statement,70)||m.statement;
+  for(const k of svc){const s=o.services&&o.services[k],def=m.services[k]||{headline:`${j(d.client.name,"을","를")} 위한 ${SERVICES[k].name} 활용 포인트`,fit:t.fit[k].slice()};
+    const f=s?arr(s.fit,3,70):[];r.services[k]={headline:(s&&str(s.headline,60))||def.headline,fit:f.length>=2?f:def.fit}}
+  const p=arr(o.process,4,80);if(p.length===4)r.process=p;
+  const a=o.analysis&&typeof o.analysis==="object"?o.analysis:null;
+  if(a)r.analysis={summary:str(a.summary,180)||"",objectives:arr(a.objectives,4,45),targets:arr(a.targets,3,45),kpis:arr(a.kpis,3,45)};
+  r.reqMap=Array.isArray(o.reqMap)?o.reqMap.map(x=>x&&({need:str(x.need,45),solution:str(x.solution,90),product:str(x.product,30)||""})).filter(x=>x&&x.need&&x.solution).slice(0,6):[];
+  if(!r.analysis&&r.reqMap.length)r.analysis={summary:"",objectives:[],targets:[],kpis:[]};
+  r.recReason=str(o.recReason,90)||"";return r}
+
+/* ---------- Claude 엔진: claude.ai(sample) 또는 Anthropic API ---------- */
+const API_URL="https://api.anthropic.com/v1";let apiKeyMem="";
+const LS="dv_api";function lsGet(){try{return JSON.parse(localStorage.getItem(LS)||"null")}catch(e){return null}}
+function lsSet(v){try{v?localStorage.setItem(LS,JSON.stringify(v)):localStorage.removeItem(LS)}catch(e){}}
+function apiKey(){return ($("apiKey").value||apiKeyMem).trim()}
+function apiHeaders(k){return{"x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true","content-type":"application/json"}}
+function apiErr(status,body){const t=body&&body.error&&body.error.type;const e=new Error((body&&body.error&&body.error.message)||("HTTP "+status));
+  e.code=status===401?"bad_key":status===403?"forbidden":status===404||t==="not_found_error"?"bad_model":status===429?"rate_limited":status===529||t==="overloaded_error"?"overloaded":status===400?"bad_request":"api_error";return e}
+async function apiJSON(prompt,signal,onProgress){const k=apiKey();if(!k){const e=new Error("no key");e.code="no_key";throw e}
+  let res;try{res=await fetch(API_URL+"/messages",{method:"POST",headers:apiHeaders(k),signal,
+    body:JSON.stringify({model:$("apiModel").value.trim()||"claude-sonnet-5-5",max_tokens:6000,stream:true,messages:[{role:"user",content:prompt}]})})}
+  catch(x){if(x&&x.name==="AbortError"){const e=new Error("cancelled");e.code="cancelled";throw e}const e=new Error("network");e.code="network";throw e}
+  if(!res.ok){const body=await res.json().catch(()=>null);throw apiErr(res.status,body)}
+  // 스트리밍(SSE)으로 받아 긴 응답에서도 연결이 끊기지 않게 합니다.
+  const rd=res.body.getReader(),dec=new TextDecoder();let buf="",text="";
+  try{for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+    while((i=buf.indexOf("\n\n"))>=0){const chunk=buf.slice(0,i);buf=buf.slice(i+2);
+      const line=chunk.split("\n").find(l=>l.startsWith("data:"));if(!line)continue;let ev;try{ev=JSON.parse(line.slice(5))}catch(x){continue}
+      if(ev.type==="content_block_delta"&&ev.delta&&ev.delta.type==="text_delta"){text+=ev.delta.text;onProgress&&onProgress(text.length)}
+      else if(ev.type==="error"){throw apiErr(ev.error&&ev.error.type==="overloaded_error"?529:500,ev)}}}}
+  catch(x){if(x&&x.code)throw x;if(x&&x.name==="AbortError"){const e=new Error("cancelled");e.code="cancelled";throw e}const e=new Error("network");e.code="network";throw e}
+  return parseLoose(text)}
+function eng(){return $("llmEngine").value}
+function showEngine(){const l=eng()==="local";$("grpClaude").hidden=l;$("grpLocal").hidden=!l;const st=$("apiState");st.classList.remove("err");
+  st.textContent=l?"Ollama는 OLLAMA_ORIGINS에 이 사이트 주소를 허용해야 브라우저에서 연결됩니다. (README 참고)":"Claude API 키를 입력하고 '연결 확인'을 누르세요."}
+function localBase(){return $("localUrl").value.trim().replace(/\/+$/,"")}
+function localHeaders(){const h={"content-type":"application/json"},k=$("localKey").value.trim();if(k)h.authorization="Bearer "+k;return h}
+async function loadModels(){const st=$("apiState");st.classList.remove("err");st.textContent="연결 확인 중…";
+  try{if(eng()==="local"){const b=localBase();if(!b){const e=new Error();e.code="no_url";throw e}
+      let res;try{res=await fetch(b+"/models",{headers:localHeaders()})}catch(x){const e=new Error();e.code="local_network";throw e}
+      const body=await res.json().catch(()=>null);if(!res.ok){const e=new Error();e.code=res.status===401?"bad_key":"local_error";throw e}
+      const ms=(body&&body.data||[]).map(x=>x.id);$("localModelList").innerHTML=ms.map(id=>`<option value="${esc(id)}">`).join("");
+      if(ms.length&&!ms.includes($("localModel").value.trim()))$("localModel").value=ms[0];
+      st.textContent=ms.length?`로컬 LLM에 연결되었습니다. 사용 모델: ${$("localModel").value} (모델 ${ms.length}개)`:"연결되었지만 설치된 모델이 없습니다. 먼저 모델을 받아 주세요 (예: ollama pull qwen3:14b).";
+      if(!ms.length)st.classList.add("err");savePref();return ms.length>0}
+    const k=apiKey();if(!k){const e=new Error();e.code="no_key";throw e}
+    const res=await fetch(API_URL+"/models?limit=50",{headers:apiHeaders(k)});const body=await res.json().catch(()=>null);if(!res.ok)throw apiErr(res.status,body);
+    const ms=(body.data||[]);$("modelList").innerHTML=ms.map(x=>`<option value="${esc(x.id)}">${esc(x.display_name||x.id)}</option>`).join("");
+    const cur=$("apiModel").value.trim();if(ms.length&&!ms.some(x=>x.id===cur)){const pick=ms.find(x=>/sonnet/.test(x.id))||ms[0];$("apiModel").value=pick.id}
+    st.textContent=`Claude API에 연결되었습니다. 사용 모델: ${$("apiModel").value} (모델 ${ms.length}개)`;savePref();return true}
+  catch(x){st.textContent=ERRMSG[x&&x.code]||"연결하지 못했습니다. 네트워크 또는 키를 확인하세요.";st.classList.add("err");return false}}
+function savePref(){if($("apiRemember").checked)lsSet({e:eng(),k:apiKey(),m:$("apiModel").value.trim(),u:$("localUrl").value.trim(),lm:$("localModel").value.trim(),lk:$("localKey").value.trim()});else lsSet(null)}
+const saveKeyPref=savePref;
+function parseLoose(text){let t=String(text||"").replace(/<think>[\s\S]*?<\/think>/g,"").replace(/```(?:json)?/g,"");const a=t.indexOf("{"),z=t.lastIndexOf("}");
+  if(a<0||z<a){const e=new Error("parse");e.code="parse";throw e}t=t.slice(a,z+1);
+  try{return JSON.parse(t)}catch(x){try{return JSON.parse(t.replace(/,\s*([}\]])/g,"$1"))}catch(y){const e=new Error("parse");e.code="parse";throw e}}}
+async function localJSON(prompt,signal,onProgress){const b=localBase(),model=$("localModel").value.trim();
+  if(!b){const e=new Error();e.code="no_url";throw e}if(!model){const e=new Error();e.code="no_local_model";throw e}
+  let res;try{res=await fetch(b+"/chat/completions",{method:"POST",headers:localHeaders(),signal,body:JSON.stringify({model,stream:true,temperature:0.3,
+      messages:[{role:"system",content:"You are a precise assistant. Reply with a single valid JSON object only, written in Korean. No markdown, no explanations."},{role:"user",content:prompt}]})})}
+  catch(x){if(x&&x.name==="AbortError"){const e=new Error();e.code="cancelled";throw e}const e=new Error();e.code="local_network";throw e}
+  if(!res.ok){const e=new Error("HTTP "+res.status);e.code=res.status===404?"bad_model":res.status===401?"bad_key":"local_error";throw e}
+  const rd=res.body.getReader(),dec=new TextDecoder();let buf="",text="";
+  try{for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
+    while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line.startsWith("data:"))continue;const dat=line.slice(5).trim();if(dat==="[DONE]")continue;
+      try{const ev=JSON.parse(dat),c=ev.choices&&ev.choices[0]&&ev.choices[0].delta&&ev.choices[0].delta.content;if(c){text+=c;onProgress&&onProgress(text.length)}}catch(x){}}}}
+  catch(x){if(x&&x.name==="AbortError"){const e=new Error();e.code="cancelled";throw e}const e=new Error();e.code="local_network";throw e}
+  return parseLoose(text)}
+const ERRMSG={bad_key:"API 키가 올바르지 않습니다. 키를 확인하세요.",forbidden:"이 키로는 해당 기능을 쓸 권한이 없습니다.",bad_model:"모델 이름을 확인하세요. '연결 확인'으로 사용 가능한 모델을 불러올 수 있습니다.",
+  rate_limited:"요청이 많아 잠시 후 다시 시도하세요.",overloaded:"Claude 서버가 혼잡합니다. 잠시 후 다시 시도하세요.",network:"Claude API에 연결하지 못했습니다. 인터넷 연결 또는 사내 방화벽을 확인하세요.",
+  parse:"LLM 응답에서 결과를 읽지 못했습니다. 다시 생성하거나 더 큰 모델을 써 보세요.",no_key:"Claude API 키를 입력하세요.",not_granted:"Claude 사용이 허용되지 않았습니다.",cancelled:"작성을 멈췄습니다.",bad_request:"요청 형식 오류입니다. 모델 이름을 확인하세요.",
+  no_url:"로컬 LLM 서버 주소를 입력하세요.",no_local_model:"로컬 LLM 모델을 입력하거나 '연결 확인'으로 불러오세요.",local_error:"로컬 LLM 서버가 오류를 반환했습니다. 모델 이름과 서버 상태를 확인하세요.",
+  local_network:"로컬 LLM에 연결하지 못했습니다. 서버 실행 여부와 CORS 허용(OLLAMA_ORIGINS) 설정, 브라우저의 로컬 네트워크 접근 허용을 확인하세요."};
+let engine=null; // "sample" | "api" | "local"
+async function runAI(prompt,signal){const sample=await sampleP;if(sample){engine="sample";return sample.json(prompt,{modelTier:"default",signal})}
+  const prog=n=>status(`LLM이 요구사항을 분석하고 있습니다… (${n.toLocaleString()}자 수신)`);
+  if(eng()==="local"){engine="local";return localJSON(prompt,signal,prog)}engine="api";return apiJSON(prompt,signal,prog)}
+
+/* ---------- UI flow ---------- */
+let model=null,busy=false,ctl=null;
+function setStep(n){[1,2,3].forEach(i=>{const e=$("st"+i);e.classList.toggle("done",i<n);e.classList.toggle("on",i===n)})}
+function status(t,err){const s=$("status");s.textContent=t;s.classList.toggle("err",!!err)}
+let toastT;function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3200)}
+function render(){$("preview").innerHTML=brochureHTML(model);$("pvLabel").textContent=`웹브로셔 미리보기 · ${model.input.client.name}${model.ai?" · LLM 요구사항 분석 반영":""}`}
+
+function syncChecks(svc){document.querySelectorAll("#svcChecks input").forEach(c=>c.checked=svc.includes(c.value))}
+$("form").addEventListener("submit",async ev=>{ev.preventDefault();if(busy)return;
+  const d=read(),e=validate(d);const em=$("err");
+  if(e.length){em.textContent=`다음 항목을 입력하세요: ${e.join(", ")}`;em.hidden=false;return}em.hidden=true;
+  if(!d.svc.length)d.svc=(TYPES[d.client.type]||TYPES["기타"]).rec.slice();
+  $("sampleBadge").hidden=true;model=baseModel(d);render();setStep(2);$("htmlBtn").disabled=false;$("pptBtn").disabled=false;
+  if(!d.useAI){status("기본 문구로 웹브로셔를 만들었습니다.");return}
+  const sample=await sampleP;if(!sample){const miss=eng()==="local"?(!localBase()?"no_url":!$("localModel").value.trim()?"no_local_model":""):(!apiKey()?"no_key":"");
+    if(miss){status(ERRMSG[miss]+" 지금은 기본 문구입니다. 아래 'LLM 연결'을 설정하고 다시 생성하세요.",true);return}}
+  busy=true;$("genBtn").disabled=true;$("genBtn").textContent="요구사항 분석 중…";status(eng()==="local"&&!window.claude?"로컬 LLM이 요구사항을 분석하고 있습니다. PC 성능에 따라 1~5분 걸릴 수 있습니다.":"Claude가 요구사항을 분석하고 제안 문구를 쓰고 있습니다. 보통 20~60초 걸립니다.");
+  ctl=new AbortController();
+  try{const o=await runAI(aiPrompt(model),ctl.signal);model=merge(model,o);syncChecks(model.input.svc);render();if(engine!=="sample")savePref();
+    const add=model.added&&model.added.length?` 추천 서비스(${model.added.map(k=>SERVICES[k].name).join(", ")})를 추가했습니다.`:"";
+    status(`요구사항 분석과 맞춤 문구를 반영했습니다.${add} 내용 확인 후 HTML 저장 또는 PPT 생성을 누르세요.`)}
+  catch(x){const c=x&&x.code;status((ERRMSG[c]||"Claude 응답을 받지 못했습니다.")+(c==="cancelled"?"":" 지금은 기본 문구입니다."),c!=="cancelled")}
+  finally{busy=false;$("genBtn").disabled=false;$("genBtn").textContent="웹브로셔 다시 생성"}});
+
+async function saveFile(name,blob){
+  const dl=await downloadsP;
+  if(dl){try{await dl.save({filename:name,data:blob});toast(`${name} 저장을 요청했습니다.`)}catch(e){toast(e&&e.code==="declined"?"저장을 취소했습니다.":"이 화면에서는 파일을 저장할 수 없습니다.")}return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast(`${name} 파일을 저장했습니다.`)}
+const fname=ext=>`닥터빌_제안서_${model.input.client.name.replace(/[\\/:*?"<>|()\s]+/g,"")}_${model.input.date.replace(/-/g,"")}.${ext}`;
+
+$("htmlBtn").addEventListener("click",()=>{if(!model)return;
+  const doc=`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>닥터빌 제안서 · ${esc(model.input.client.name)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;500;700;900&family=Poppins:wght@700;800&display=swap"><style>body{margin:0}${$("bro-css").textContent}</style></head><body>${brochureHTML(model)}</body></html>`;
+  saveFile(fname("html"),new Blob([doc],{type:"text/html"}))});
+
+/* ---------- logo ---------- */
+$("logoBtn").onclick=()=>$("logoFile").click();
+$("logoFile").onchange=()=>{const f=$("logoFile").files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{customLogo={url:r.result,w:im.naturalWidth,h:im.naturalHeight};$("logoState").textContent=f.name;$("logoReset").hidden=false;if(model)render()};im.src=r.result};r.readAsDataURL(f)};
+$("logoReset").onclick=()=>{customLogo=null;$("logoState").textContent="기본 로고";$("logoReset").hidden=true;$("logoFile").value="";if(model)render()};
+
+/* ---------- PPT (16:9) ---------- */
+function iconPNG(){return new Promise(res=>{const im=new Image();im.onload=()=>{const c=document.createElement("canvas");c.width=c.height=192;c.getContext("2d").drawImage(im,0,0,192,192);res(c.toDataURL("image/png"))};im.onerror=()=>res(null);
+  im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(ICON_SVG.replace("<svg ",'<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" '))})}
+async function logoPNG(){if(!customLogo)return null;return new Promise(res=>{const im=new Image();im.onload=()=>{const sc=Math.min(1,900/im.naturalWidth),c=document.createElement("canvas");c.width=Math.round(im.naturalWidth*sc);c.height=Math.round(im.naturalHeight*sc);c.getContext("2d").drawImage(im,0,0,c.width,c.height);res({data:c.toDataURL("image/png"),ar:c.width/c.height})};im.onerror=()=>res(null);im.src=customLogo.url})}
+
+async function buildPPT(m){
+  const P=new PptxGenJS();P.layout="LAYOUT_WIDE";P.author=m.input.manager.name;P.company="엠서클 닥터빌";P.title=`닥터빌 제안서 - ${m.input.client.name}`;
+  const KR="Malgun Gothic",D="Impact",W=13.333;
+  const C={navy:"001121",blue:"0085FF",ice:"E4EEF7",ink:"001121",mute:"55657A",line:"D5E0EA",white:"FFFFFF",mint:"12D6B0",soft:"B9C8D8",dim:"7F93A8"};
+  const d=m.input,cn=d.client.name,icon=await iconPNG(),cl=await logoPNG();let page=0,nS=0;const addS=()=>{nS++;return P.addSlide()};
+  const logo=(s,x,y,h,onDark)=>{if(onDark)s.addShape(P.ShapeType.roundRect,{x:x-0.12,y:y-0.08,w:(cl?h*cl.ar:h*3.6)+0.24,h:h+0.16,fill:{color:C.white},line:{color:C.white},rectRadius:0.08});
+    if(cl){s.addImage({data:cl.data,x,y,h,w:h*cl.ar});return}
+    if(icon)s.addImage({data:icon,x,y,w:h,h});s.addText("Dr.Ville",{x:x+h*1.1,y,w:h*2.6,h,fontFace:"Arial Black",fontSize:Math.round(h*30),color:"1667BE",bold:true,margin:0,valign:"middle"})};
+  const foot=s=>{page++;s.addShape(P.ShapeType.line,{x:0.6,y:7.0,w:W-1.2,h:0,line:{color:C.line,width:0.75}});
+    s.addText(`Dr.Ville  |  ${cn} 제안서`,{x:0.6,y:7.05,w:7,h:0.3,fontFace:KR,fontSize:9,color:C.mute,margin:0});
+    s.addText(String(page).padStart(2,"0"),{x:W-1.6,y:7.05,w:1,h:0.3,fontFace:D,fontSize:11,color:C.blue,align:"right",margin:0})};
+  const head=(s,en,kr)=>{s.addText(en.toUpperCase(),{x:0.6,y:0.4,w:12,h:0.95,fontFace:D,fontSize:54,color:C.blue,margin:0,valign:"bottom"});
+    s.addText(kr,{x:0.6,y:1.38,w:12,h:0.45,fontFace:KR,fontSize:17,bold:true,color:C.ink,margin:0})};
+
+  // 1 Cover
+  let s=addS();s.background={color:C.navy};page++;
+  s.addShape(P.ShapeType.ellipse,{x:8.4,y:-2.2,w:7.4,h:7.4,fill:{color:C.blue,transparency:82},line:{type:"none"}});
+  s.addShape(P.ShapeType.ellipse,{x:10.6,y:4.6,w:4.2,h:4.2,fill:{color:C.mint,transparency:88},line:{type:"none"}});
+  logo(s,0.72,0.55,0.42,true);
+  s.addText(`${d.client.type} 맞춤 제안  ·  ${fmtDate(d.date)}`,{x:0.6,y:1.35,w:8,h:0.4,fontFace:KR,fontSize:13,bold:true,color:"CFE6FF",margin:0});
+  s.addText("CONNECT WITH",{x:0.6,y:1.8,w:12,h:1.1,fontFace:D,fontSize:72,color:C.white,margin:0,valign:"bottom"});
+  s.addText("65,000 DOCTORS",{x:0.6,y:2.85,w:12,h:1.1,fontFace:D,fontSize:72,color:C.blue,margin:0,valign:"top"});
+  s.addText(m.heroTitle,{x:0.6,y:4.1,w:11.2,h:0.9,fontFace:KR,fontSize:22,bold:true,color:C.white,margin:0,valign:"top"});
+  s.addText(m.heroLead,{x:0.6,y:5.0,w:10.5,h:0.75,fontFace:KR,fontSize:13,color:C.soft,margin:0,valign:"top"});
+  s.addShape(P.ShapeType.line,{x:0.6,y:6.0,w:W-1.2,h:0,line:{color:"33475C",width:0.75}});
+  [["CLIENT",cn+(d.client.dept?`  ·  ${d.client.dept}`:"")],["PROPOSED BY",`${d.manager.name} ${d.manager.title}`.trim()],["DATE",fmtDate(d.date)]].forEach((r,i)=>{
+    const x=0.6+i*4.1;s.addText(r[0],{x,y:6.15,w:3.9,h:0.3,fontFace:D,fontSize:13,color:C.dim,margin:0,charSpacing:2});
+    s.addText(r[1],{x,y:6.45,w:3.9,h:0.4,fontFace:KR,fontSize:14,bold:true,color:C.white,margin:0,fit:"shrink"})});
+
+  // 2 Proposal
+  s=addS();s.background={color:C.white};head(s,"Proposal","제안 배경");
+  s.addText(m.introHeadline,{x:0.6,y:2.1,w:6.3,h:0.9,fontFace:KR,fontSize:22,bold:true,color:C.ink,margin:0,valign:"top"});
+  s.addText(m.introBody,{x:0.6,y:3.05,w:6.3,h:2.5,fontFace:KR,fontSize:13,color:C.mute,margin:0,valign:"top",lineSpacingMultiple:1.35});
+  s.addShape(P.ShapeType.rect,{x:7.3,y:2.1,w:5.43,h:3.55,fill:{color:C.ice},line:{type:"none"}});
+  s.addText(`KEY POINTS FOR ${cn}`,{x:7.6,y:2.3,w:4.9,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0});
+  const nb=m.introBullets.length,rowH=Math.min(0.72,2.6/nb);
+  m.introBullets.forEach((b,i)=>{const y=2.85+i*rowH;s.addText(String(i+1).padStart(2,"0"),{x:7.6,y,w:0.5,h:rowH,fontFace:D,fontSize:20,color:C.blue,margin:0,valign:"top"});
+    s.addText(b,{x:8.15,y:y+0.02,w:4.4,h:rowH,fontFace:KR,fontSize:13,bold:true,color:C.ink,margin:0,valign:"top"})});
+  s.addShape(P.ShapeType.rect,{x:0.6,y:5.95,w:W-1.2,h:0.8,fill:{color:C.navy},line:{type:"none"}});
+  s.addText(m.statement,{x:0.9,y:5.95,w:W-1.8,h:0.8,fontFace:KR,fontSize:16,bold:true,color:C.white,margin:0,valign:"middle"});foot(s);
+
+  const TH={fontFace:KR,fontSize:12,bold:true,color:C.white,fill:{color:C.navy},margin:[0.04,0.12,0.04,0.12],valign:"middle"};
+  const TD=(o={})=>Object.assign({fontFace:KR,fontSize:12,color:C.ink,fill:{color:C.white},margin:[0.04,0.12,0.04,0.12],valign:"middle",border:[{type:"none"},{type:"none"},{pt:0.75,color:C.line},{type:"none"}]},o);
+  // Insight (요구사항 분석)
+  if(m.analysis){const a=m.analysis;s=addS();s.background={color:C.white};head(s,"Insight","요구사항 분석 및 대응 방안");
+    let y0=1.95;if(a.summary){s.addText(a.summary,{x:0.6,y:1.95,w:W-1.2,h:0.5,fontFace:KR,fontSize:12,color:C.mute,margin:0,valign:"top"});y0=2.5}
+    [["OBJECTIVE","목표",a.objectives],["TARGET","타겟",a.targets],["KPI","목표 지표",a.kpis]].forEach((g,i)=>{const x=0.6+i*4.1,w=3.93;
+      s.addShape(P.ShapeType.rect,{x,y:y0,w,h:1.35,fill:{color:C.ice},line:{type:"none"}});
+      s.addText([{text:g[0]+"  ",options:{fontFace:D,fontSize:13,color:C.blue}},{text:g[1],options:{fontFace:KR,fontSize:12,bold:true,color:C.ink}}],{x:x+0.18,y:y0+0.08,w:w-0.36,h:0.3,margin:0});
+      const items=g[2].length?g[2]:["제안 협의 시 함께 설정"];
+      s.addText(items.map((t,n)=>({text:t,options:{bullet:{indent:10},breakLine:n<items.length-1}})),{x:x+0.18,y:y0+0.42,w:w-0.36,h:0.88,fontFace:KR,fontSize:10.5,color:C.ink,margin:0,valign:"top",fit:"shrink"})});
+    if(m.reqMap&&m.reqMap.length){const rows=[["요구사항","닥터빌 대응 방안","활용 상품"].map(t=>({text:t,options:TH}))].concat(m.reqMap.slice(0,5).map(x=>[x.need,x.solution,x.product].map((t,i)=>({text:t,options:TD({fontSize:10.5,bold:i!==1,color:i===2?C.blue:i===1?C.mute:C.ink})}))));
+      s.addTable(rows,{x:0.6,y:y0+1.55,w:W-1.2,colW:[3.4,6.2,W-1.2-9.6],rowH:0.4})}
+    foot(s)}
+
+  // 3 About
+  s=addS();s.background={color:C.ice};head(s,"About us","국내 최대 규모의 프리미엄 의료 플랫폼");
+  SOURCE.stats.forEach((st,i)=>{const x=0.6+i*3.05;s.addShape(P.ShapeType.rect,{x,y:2.15,w:2.9,h:1.65,fill:{color:C.white},line:{type:"none"}});
+    s.addText(st[0],{x:x+0.25,y:2.3,w:2.5,h:0.85,fontFace:D,fontSize:44,color:C.blue,margin:0,valign:"bottom"});
+    s.addText(st[1],{x:x+0.25,y:3.2,w:2.5,h:0.4,fontFace:KR,fontSize:12,color:C.mute,margin:0})});
+  SOURCE.demo.forEach((g,i)=>{const x=0.6+i*4.1;s.addText(g[0],{x,y:4.2,w:3.8,h:0.4,fontFace:KR,fontSize:14,bold:true,color:C.ink,margin:0});
+    g[1].forEach((r,k)=>{const y=4.75+k*0.6;s.addText(r[0],{x,y,w:1.1,h:0.35,fontFace:KR,fontSize:12,color:C.ink,margin:0,valign:"middle"});
+      s.addShape(P.ShapeType.rect,{x:x+1.15,y:y+0.1,w:2.0,h:0.16,fill:{color:C.white},line:{type:"none"}});
+      s.addShape(P.ShapeType.rect,{x:x+1.15,y:y+0.1,w:2.0*r[1]/40,h:0.16,fill:{color:C.blue},line:{type:"none"}});
+      s.addText(r[1]+"%",{x:x+3.2,y,w:0.6,h:0.35,fontFace:KR,fontSize:12,bold:true,color:C.ink,margin:0,align:"right",valign:"middle"})})});
+  foot(s);
+
+  // 4.. Services
+  d.svc.forEach((k,i)=>{const sv=SERVICES[k],f=m.services[k];s=addS();s.background={color:C.white};
+    s.addText(`SERVICE ${String(i+1).padStart(2,"0")}  ·  ${sv.en}`,{x:0.6,y:0.5,w:8,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0,charSpacing:2});
+    s.addText(sv.name,{x:0.6,y:0.9,w:8,h:0.75,fontFace:KR,fontSize:30,bold:true,color:C.ink,margin:0,valign:"middle"});
+    s.addText(sv.sub,{x:0.6,y:1.65,w:7.3,h:0.6,fontFace:KR,fontSize:13,color:C.mute,margin:0,valign:"top"});
+    sv.why.forEach((w,n)=>{const y=2.45+n*0.88;s.addShape(P.ShapeType.rect,{x:0.6,y,w:0.06,h:0.72,fill:{color:C.line},line:{type:"none"}});
+      s.addText(w[0],{x:0.85,y,w:7,h:0.3,fontFace:KR,fontSize:14,bold:true,color:C.ink,margin:0});
+      s.addText(w[1],{x:0.85,y:y+0.32,w:7,h:0.42,fontFace:KR,fontSize:11,color:C.mute,margin:0,valign:"top"})});
+    s.addText("주요 상품",{x:0.6,y:5.2,w:3,h:0.3,fontFace:KR,fontSize:11,bold:true,color:C.blue,margin:0});
+    const half=sv.items.length>3?Math.ceil(sv.items.length/2):sv.items.length,cols=half<sv.items.length?[sv.items.slice(0,half),sv.items.slice(half)]:[sv.items];
+    cols.forEach((col,ci)=>s.addText(col.flatMap((it,n)=>[{text:it[0]+"  ",options:{bold:true,color:C.ink}},{text:it[1],options:{color:C.mute,breakLine:n<col.length-1}}]),
+      {x:0.6+ci*3.7,y:5.5,w:cols.length>1?3.55:7.3,h:1.3,fontFace:KR,fontSize:cols.length>1?10.5:11.5,margin:0,valign:"top",paraSpaceAfter:4}));
+    s.addShape(P.ShapeType.rect,{x:8.3,y:0.6,w:4.43,h:6.15,fill:{color:C.navy},line:{type:"none"}});
+    s.addText(`FOR ${cn}`,{x:8.6,y:0.85,w:3.9,h:0.4,fontFace:D,fontSize:18,color:"6FB8FF",margin:0,fit:"shrink"});
+    s.addText(f.headline,{x:8.6,y:1.35,w:3.85,h:1.3,fontFace:KR,fontSize:17,bold:true,color:C.white,margin:0,valign:"top"});
+    f.fit.forEach((x,n)=>{const y=2.95+n*1.15;s.addShape(P.ShapeType.rect,{x:8.6,y:y+0.1,w:0.1,h:0.1,fill:{color:C.mint},line:{type:"none"}});
+      s.addText(x,{x:8.85,y,w:3.6,h:1.0,fontFace:KR,fontSize:12.5,color:"D3DEEA",margin:0,valign:"top"})});
+    foot(s)});
+
+  // Ad products (플랫폼 광고 선택 시)
+  if(d.svc.includes("platform")){s=addS();s.background={color:C.white};head(s,"Ad products","광고 상품 안내  ·  "+ADS.lead);
+    const rows=[["광고 상품","도달 타겟","특징"].map(t=>({text:t,options:TH}))].concat(ADS.rows.map(r=>r.map((t,i)=>({text:t,options:TD(i===0?{bold:true}:{color:i===2?C.ink:C.mute})}))));
+    s.addTable(rows,{x:0.6,y:2.1,w:W-1.2,colW:[3.9,4.0,W-1.2-7.9],rowH:0.5});
+    s.addText(ADS.note,{x:0.6,y:6.25,w:W-1.2,h:0.3,fontFace:KR,fontSize:9.5,color:C.mute,margin:0});foot(s)}
+
+  // Live seminar detail (웹 세미나 선택 시)
+  if(d.svc.includes("webinar")){s=addS();s.background={color:C.white};head(s,"Live seminar","라이브세미나 운영 유형  ·  평균 3,000~3,500명, 최대 6,000명 동시 입장");
+    SEMINAR.formats.forEach((f,i)=>{const x=0.6+i*4.1,w=3.93;s.addShape(P.ShapeType.rect,{x,y:2.05,w,h:1.4,fill:{color:C.ice},line:{type:"none"}});
+      s.addText(f[0],{x:x+0.2,y:2.15,w:w-0.4,h:0.3,fontFace:D,fontSize:14,color:C.blue,margin:0,charSpacing:1});
+      s.addText(f[1],{x:x+0.2,y:2.45,w:w-0.4,h:0.35,fontFace:KR,fontSize:15,bold:true,color:C.ink,margin:0});
+      s.addText(f[2],{x:x+0.2,y:2.8,w:w-0.4,h:0.3,fontFace:KR,fontSize:10.5,color:C.mute,margin:0});
+      if(d.price)s.addText(`Basic ${f[3]}원  ·  Option ${f[4]}원`,{x:x+0.2,y:3.1,w:w-0.4,h:0.28,fontFace:KR,fontSize:10.5,bold:true,color:C.blue,margin:0})});
+    s.addText("SERIES",{x:0.6,y:3.62,w:3,h:0.28,fontFace:D,fontSize:14,color:C.blue,margin:0,charSpacing:2});
+    SEMINAR.series.forEach((f,i)=>{const x=0.6+i*4.1,w=3.93;s.addShape(P.ShapeType.rect,{x,y:3.92,w,h:0.95,fill:{color:C.white},line:{color:C.line,width:0.75}});
+      s.addText([{text:f[1]+"  ",options:{bold:true,color:C.ink,fontSize:13}},{text:f[3],options:{bold:true,color:C.blue,fontSize:12}}],{x:x+0.2,y:3.98,w:w-0.4,h:0.36,fontFace:KR,margin:0,valign:"middle"});
+      s.addText(f[2],{x:x+0.2,y:4.36,w:w-0.4,h:0.45,fontFace:KR,fontSize:10.5,color:C.mute,margin:0,valign:"top"})});
+    s.addText("PROCESS",{x:0.6,y:5.02,w:3,h:0.28,fontFace:D,fontSize:14,color:C.blue,margin:0,charSpacing:2});
+    SEMINAR.steps.forEach((p,i)=>{const x=0.6+i*2.46,w=2.3;s.addShape(P.ShapeType.line,{x,y:5.35,w,h:0,line:{color:C.ink,width:1.25}});
+      s.addText([{text:String(i+1)+"  ",options:{fontFace:D,fontSize:20,color:C.blue}},{text:p[0],options:{fontFace:KR,fontSize:13,bold:true,color:C.ink}}],{x,y:5.42,w,h:0.42,margin:0,valign:"middle"});
+      s.addText(p[1],{x,y:5.86,w,h:0.26,fontFace:KR,fontSize:10.5,bold:true,color:C.blue,margin:0});
+      s.addText(p[2],{x,y:6.12,w,h:0.3,fontFace:KR,fontSize:10.5,color:C.mute,margin:0})});
+    s.addText(SEMINAR.slots,{x:0.6,y:6.55,w:W-1.2,h:0.3,fontFace:KR,fontSize:9.5,color:C.mute,margin:0});foot(s)}
+
+  // Process
+  s=addS();s.background={color:C.white};head(s,"How to work","진행 프로세스");
+  SOURCE.process.forEach((p,i)=>{const x=0.6+i*3.1;s.addShape(P.ShapeType.line,{x,y:2.3,w:2.85,h:0,line:{color:C.ink,width:1.5}});
+    s.addText(String(i+1).padStart(2,"0"),{x,y:2.45,w:2.85,h:0.9,fontFace:D,fontSize:48,color:C.blue,margin:0,valign:"top"});
+    s.addText(p[0],{x,y:3.45,w:2.85,h:0.45,fontFace:KR,fontSize:16,bold:true,color:C.ink,margin:0});
+    s.addText(m.process[i]||p[1],{x,y:3.95,w:2.75,h:1.6,fontFace:KR,fontSize:12,color:C.mute,margin:0,valign:"top",lineSpacingMultiple:1.25})});
+  foot(s);
+
+  // Price (단가 포함 선택 시)
+  const pg=priceRows(d);
+  if(d.price&&pg.length){s=addS();s.background={color:C.white};head(s,"Price summary","광고 단가 요약  ·  VAT 별도");
+    const lab={platform:"플랫폼 광고",webinar:"라이브세미나"},two=pg.length>1,gw=two?[7.0,4.93]:[W-1.2];
+    let x=0.6;pg.forEach(([k,rows],gi)=>{const w=gw[gi];
+      s.addText(lab[k],{x,y:1.95,w,h:0.3,fontFace:KR,fontSize:12,bold:true,color:C.blue,margin:0});
+      const rh=Math.min(0.32,4.3/(rows.length+1)),fs=rows.length>10?9.5:10.5;
+      const cw=two?(gi===0?[1.1,3.3,1.0,1.6]:[1.05,2.2,0.58,1.1]):[1.25,w-1.25-1.0-1.45,1.0,1.45];
+      const t=[["분류","상품명","기준","단가 (원)"].map((h,i)=>({text:h,options:Object.assign({},TH,{fontSize:10.5,align:i===3?"right":"left"})}))]
+        .concat(rows.map(r=>r.map((v,i)=>({text:v,options:TD({fontSize:fs,bold:i===0||i===3,color:i===3?C.blue:(i===0?C.ink:C.mute),align:i===3?"right":"left"})}))));
+      s.addTable(t,{x,y:2.3,w,colW:cw,rowH:rh});x+=w+0.2});
+    s.addText(PRICE.note+(d.svc.includes("conference")?" / 컨퍼런스는 별도 견적":""),{x:0.6,y:6.68,w:W-1.2,h:0.28,fontFace:KR,fontSize:9,color:C.mute,margin:0});foot(s)}
+
+  // Partners
+  s=addS();s.background={color:C.ice};head(s,"Our partners",SOURCE.partnerLine);
+  SOURCE.partners.forEach((p,i)=>{const col=i%5,row=Math.floor(i/5),x=0.6+col*2.43,y=2.2+row*1.4;
+    s.addShape(P.ShapeType.rect,{x,y,w:2.35,h:1.3,fill:{color:C.white},line:{type:"none"}});
+    s.addText(p,{x,y,w:2.35,h:1.3,fontFace:"Arial Black",fontSize:14,color:"6A7B8E",align:"center",valign:"middle",margin:0})});
+  foot(s);
+
+  // Closing
+  s=addS();s.background={color:C.navy};page++;
+  s.addShape(P.ShapeType.ellipse,{x:-2.5,y:2.5,w:7,h:7,fill:{color:C.blue,transparency:85},line:{type:"none"}});
+  s.addText("THANK YOU",{x:0.6,y:0.7,w:12,h:1.5,fontFace:D,fontSize:110,color:C.white,margin:0,valign:"bottom"});
+  s.addText(`${j(cn,"과","와")} 함께할 다음 단계를 기다리겠습니다.`,{x:0.6,y:2.3,w:12,h:0.5,fontFace:KR,fontSize:18,bold:true,color:C.blue,margin:0});
+  s.addShape(P.ShapeType.rect,{x:0.6,y:3.4,w:6.0,h:2.9,fill:{type:"none"},line:{color:"33475C",width:1}});
+  s.addText("CONTACT",{x:0.9,y:3.6,w:5,h:0.35,fontFace:D,fontSize:16,color:C.dim,margin:0,charSpacing:2});
+  s.addText(`${d.manager.name} ${d.manager.title}`.trim(),{x:0.9,y:4.0,w:5.5,h:0.55,fontFace:KR,fontSize:22,bold:true,color:C.white,margin:0});
+  s.addText(d.manager.org||"엠서클 닥터빌",{x:0.9,y:4.55,w:5.5,h:0.4,fontFace:KR,fontSize:13,color:C.soft,margin:0});
+  s.addText([{text:"이메일   ",options:{color:C.dim}},{text:d.manager.email,options:{color:C.white,breakLine:!!d.manager.phone}}].concat(d.manager.phone?[{text:"연락처   ",options:{color:C.dim}},{text:d.manager.phone,options:{color:C.white}}]:[]),
+    {x:0.9,y:5.1,w:5.5,h:0.9,fontFace:KR,fontSize:13,margin:0,valign:"top",paraSpaceAfter:4});
+  logo(s,0.72,6.6,0.34,true);
+  s.addText("© 2026 Doctor Ville. All rights reserved.",{x:7,y:6.65,w:5.73,h:0.3,fontFace:KR,fontSize:9,color:C.dim,align:"right",margin:0});
+  const blob=await P.write({outputType:"blob"});return {blob,n:nS};
+}
+$("pptBtn").addEventListener("click",async()=>{if(!model||busy)return;if(typeof PptxGenJS==="undefined"){status("PPT 라이브러리를 불러오지 못했습니다. 네트워크 확인 후 새로고침하세요.",true);return}
+  const b=$("pptBtn");b.disabled=true;b.textContent="PPT 만드는 중…";
+  try{const r=await buildPPT(model);setStep(4);await saveFile(fname("pptx"),r.blob);status(`PPT ${r.n}장(16:9)을 만들었습니다.`)}
+  catch(e){console.error(e);status("PPT를 만들지 못했습니다. 입력값을 확인하고 다시 시도하세요.",true)}
+  finally{b.disabled=false;b.textContent="PPT 생성 (16:9)"}});
+window.__dv={localJSON,parseLoose,buildPPT,get model(){return model},set model(v){model=v},brochureHTML,merge,aiPrompt,apiJSON,render:()=>render()};
+
+/* ---------- API 설정 ---------- */
+(()=>{const v=lsGet();if(v){$("apiRemember").checked=true;if(v.e)$("llmEngine").value=v.e;if(v.k)$("apiKey").value=v.k;if(v.m)$("apiModel").value=v.m;if(v.u)$("localUrl").value=v.u;if(v.lm)$("localModel").value=v.lm;if(v.lk)$("localKey").value=v.lk}
+  showEngine();if(v)$("apiState").textContent="저장된 설정을 불러왔습니다. '연결 확인'으로 점검할 수 있습니다."})();
+$("llmEngine").onchange=()=>{showEngine();savePref()};$("apiTest").onclick=()=>loadModels();
+$("apiRemember").onchange=savePref;["apiKey","apiModel","localUrl","localModel","localKey"].forEach(id=>$(id).addEventListener("change",()=>{if($("apiRemember").checked)savePref()}));
+sampleP.then(sm=>{if(sm){$("apiBox").hidden=true}});
+
+/* ---------- initial example ---------- */
+fill(EXAMPLE);model=baseModel(read());render();setStep(1);
+$("pvLabel").textContent="웹브로셔 미리보기 · 예시 입력값으로 만든 화면입니다";
+document.querySelectorAll("#form input,#form select,#form textarea").forEach(el=>el.addEventListener("input",()=>{if(model&&!busy)setStep(1)},{once:false}));
+})();
+</script>
+
+</body></html>
