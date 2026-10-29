@@ -1,0 +1,9 @@
+name = "drville-proposal-api"
+main = "worker.js"
+compatibility_date = "2026-01-15"
+workers_dev = true
+
+[vars]
+MODEL = "claude-sonnet-5-5"
+# 추가로 허용할 사이트 주소(쉼표로 구분). 기본값: https://doctorville.github.io
+ALLOWED_ORIGINS = ""

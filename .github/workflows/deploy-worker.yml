@@ -1,0 +1,73 @@
+name: Deploy AI proxy (Cloudflare Worker)
+
+on:
+  push:
+    branches: [main]
+    paths: ["worker/**", ".github/workflows/deploy-worker.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check secrets
+        run: |
+          missing=""
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "$CLOUDFLARE_ACCOUNT_ID" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -z "$ANTHROPIC_API_KEY" ] && missing="$missing ANTHROPIC_API_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::GitHub 저장소 Settings > Secrets and variables > Actions 에 다음 시크릿을 등록하세요:$missing"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy worker
+        working-directory: worker
+        run: |
+          npx --yes wrangler@4 deploy 2>&1 | tee deploy.log
+          url=$(grep -oE 'https://[A-Za-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "WORKER_URL=$url" >> "$GITHUB_ENV"
+
+      - name: Set worker secrets
+        working-directory: worker
+        run: |
+          printf '%s' "$ANTHROPIC_API_KEY" | npx --yes wrangler@4 secret put ANTHROPIC_API_KEY
+          if [ -n "$ACCESS_CODE" ]; then
+            printf '%s' "$ACCESS_CODE" | npx --yes wrangler@4 secret put ACCESS_CODE
+          else
+            npx --yes wrangler@4 secret delete ACCESS_CODE --force >/dev/null 2>&1 || true
+          fi
+
+      - name: Write config.js
+        run: |
+          if [ -z "$WORKER_URL" ]; then
+            echo "::warning::Worker 주소를 찾지 못했습니다. Cloudflare 대시보드에서 workers.dev 서브도메인을 먼저 만드세요."
+            exit 0
+          fi
+          printf '// 자동 생성 파일 (deploy-worker.yml). AI 프록시 주소\nwindow.DV_API_BASE = "%s";\n' "$WORKER_URL" > config.js
+          if ! git diff --quiet -- config.js; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add config.js
+            git commit -m "config.js: AI 프록시 주소 갱신"
+            git push
+          fi
+          echo "AI 프록시: $WORKER_URL"

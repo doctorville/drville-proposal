@@ -66,6 +66,25 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .logo-up{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--app-mute);flex-wrap:wrap}
 .logo-up button{font:inherit;font-size:12px;background:none;border:1px solid var(--app-line);color:var(--app-fg);border-radius:6px;padding:4px 8px;cursor:pointer}
 [hidden]{display:none!important}
+.org{border:1px solid var(--app-line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--app-field);min-width:0}
+.org-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}
+.org-h button,.org .add{font:inherit;font-size:12px;background:none;border:1px solid var(--app-line);color:var(--app-accent);border-radius:6px;padding:3px 8px;cursor:pointer;white-space:nowrap}
+.org-h button:disabled,.org .add:disabled{opacity:.5;cursor:default}
+.org-st{margin:0;font-size:12px;color:var(--app-mute)}
+.org-st.err{color:#E5484D}
+.org h5{margin:6px 0 4px;font-size:12px;color:var(--app-accent);letter-spacing:.04em}
+.org p{margin:0;font-size:13px}
+.org ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.org li{font-size:13px;line-height:1.5}
+.org li small{color:var(--app-mute)}
+.org li a{color:var(--app-accent);font-size:12px;text-decoration:none}
+.org .imp li{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start}
+.org .chips{display:flex;flex-wrap:wrap;gap:4px}
+.org .chips span{font-size:11px;border:1px solid var(--app-line);border-radius:999px;padding:1px 8px;background:var(--app-panel)}
+.org .src{font-size:11px;color:var(--app-mute);display:flex;flex-wrap:wrap;gap:4px 10px}
+.org .src a{color:var(--app-mute)}
+.org .addall{align-self:flex-start}
+.access{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <style id="bro-css">
@@ -231,7 +250,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
     <fieldset>
       <legend>제안처</legend>
-      <label class="f">기관명 <b>*</b><input type="text" id="cName" required></label>
+      <label class="f">기관명 <b>*</b><input type="text" id="cName" required placeholder="예: 대웅제약"></label>
+      <section class="org" id="orgBox" aria-live="polite">
+        <div class="org-h"><b>기관 최신 정보</b><button type="button" id="orgBtn">조회</button></div>
+        <p class="org-st" id="orgState">기관명을 입력하면 최근 뉴스·동향을 찾아 요약합니다.</p>
+        <div id="orgBody"></div>
+      </section>
       <div class="row2">
         <label class="f">유형<select id="cType">
           <option>제약사</option><option>의료기기사</option><option>학회</option><option>병원</option><option>기타</option>
@@ -251,9 +275,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       <label class="f">타겟 진료과<input type="text" id="target" placeholder="예: 내과, 가정의학과"></label>
       <label class="f">요구사항 · 제안 목적 (RFP·메일·통화 메모 원문 붙여넣기 가능)<textarea id="reqs" rows="7"></textarea></label>
       <label class="toggle"><input type="checkbox" id="useAI" checked>
-        <span>LLM으로 요구사항 분석 · 맞춤 문구 작성<small>원문에서 목표·타겟·KPI를 뽑아 요구사항별 대응 방안을 만들고, 제목·제안 배경·서비스별 포인트를 새로 씁니다. 끄면 기본 문구로 만듭니다.</small></span></label>
+        <span>AI로 요구사항 분석 · 맞춤 문구 작성<small>원문에서 목표·타겟·KPI를 뽑아 요구사항별 대응 방안을 만들고, 제목·제안 배경·서비스별 포인트를 새로 씁니다. 끄면 기본 문구로 만듭니다.</small></span></label>
       <label class="toggle"><input type="checkbox" id="svcAuto" checked>
-        <span>분석 결과로 서비스 추천 반영<small>요구사항에 맞는 서비스를 LLM이 추천하면 선택 서비스에 더합니다. 서비스를 하나도 고르지 않아도 됩니다.</small></span></label>
+        <span>분석 결과로 서비스 추천 반영<small>요구사항에 맞는 서비스를 AI가 추천하면 선택 서비스에 더합니다. 서비스를 하나도 고르지 않아도 됩니다.</small></span></label>
       <label class="toggle"><input type="checkbox" id="incPrice">
         <span>광고 단가 포함<small>광고제안서 Price Summary 기준 단가표를 웹브로셔·PPT에 넣습니다. 외부 발송 전 팀장·사업부장 승인을 받으세요.</small></span></label>
       <div class="logo-up">로고: <span id="logoState">기본 로고</span>
@@ -263,26 +287,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
       <p class="note">계약 조건, 단가, 내부 전략, 개인정보는 사내 지침에 따라 팀장·사업부장 승인 후 입력하세요.</p>
     </fieldset>
 
-    <fieldset id="apiBox">
-      <legend>LLM 연결</legend>
-      <label class="f">엔진<select id="llmEngine">
-        <option value="claude">Claude API (Anthropic)</option>
-        <option value="local">로컬 LLM (Ollama · LM Studio 등 OpenAI 호환)</option>
-      </select></label>
-      <div id="grpClaude" style="display:contents">
-        <label class="f">Claude API 키<input type="password" id="apiKey" autocomplete="off" spellcheck="false" placeholder="sk-ant-..."></label>
-        <label class="f">모델<input type="text" id="apiModel" list="modelList" value="claude-sonnet-5-5" spellcheck="false"><datalist id="modelList"></datalist></label>
-      </div>
-      <div id="grpLocal" style="display:contents" hidden>
-        <label class="f">서버 주소 (OpenAI 호환 /v1)<input type="text" id="localUrl" value="http://localhost:11434/v1" spellcheck="false"></label>
-        <label class="f">모델<input type="text" id="localModel" list="localModelList" placeholder="예: qwen3:14b" spellcheck="false"><datalist id="localModelList"></datalist></label>
-        <label class="f">API 키 (필요한 경우만)<input type="password" id="localKey" autocomplete="off" spellcheck="false"></label>
-      </div>
-      <button type="button" class="btn ghost" id="apiTest" style="padding:8px 10px">연결 확인 · 모델 불러오기</button>
-      <label class="toggle"><input type="checkbox" id="apiRemember">
-        <span>이 브라우저에 설정 기억<small>개인 PC에서만 켜세요. 키는 이 브라우저에만 저장되며 서버·HTML 파일·저장하는 제안서에 들어가지 않습니다.</small></span></label>
-      <p class="status" id="apiState">엔진을 고르고 연결 정보를 입력하세요. 요청은 이 브라우저에서 선택한 LLM으로 직접 전송됩니다.</p>
-    </fieldset>
+    <div class="access" id="accessBox" hidden>
+      <label class="f">팀 접근 코드<input type="password" id="accessCode" autocomplete="off" spellcheck="false"></label>
+      <button type="button" class="btn ghost" id="accessOk" style="padding:8px 10px">확인</button>
+    </div>
 
     <div class="actions">
       <p class="err-msg" id="err" hidden></p>
@@ -303,6 +311,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="config.js"></script>
 <script>
 (function(){
 "use strict";
@@ -384,7 +393,7 @@ function fill(v){for(const k of["mName","mTitle","mOrg","mEmail","mPhone","cName
 function read(){const svc=[...document.querySelectorAll("#svcChecks input:checked")].map(c=>c.value);
   return{useAI:$("useAI").checked,svcAuto:$("svcAuto").checked,manager:{name:$("mName").value.trim(),title:$("mTitle").value.trim(),org:$("mOrg").value.trim(),email:$("mEmail").value.trim(),phone:$("mPhone").value.trim()},
     client:{name:$("cName").value.trim(),type:$("cType").value,dept:$("cDept").value.trim()},date:$("pDate").value||today(),
-    target:$("target").value.trim(),price:$("incPrice").checked,raw:$("reqs").value.trim(),picked:svc.slice(),reqs:$("reqs").value.split(/\n+/).map(s=>s.replace(/^[\s\-•·*\d.)]+/,"").trim()).filter(Boolean),svc}}
+    target:$("target").value.trim(),price:$("incPrice").checked,raw:$("reqs").value.trim(),picked:svc.slice(),org:orgFor($("cName").value.trim()),reqs:$("reqs").value.split(/\n+/).map(s=>s.replace(/^[\s\-•·*\d.)]+/,"").trim()).filter(Boolean),svc}}
 function validate(d){const e=[];if(!d.manager.name)e.push("제안담당자 이름");if(!/^\S+@\S+\.\S+$/.test(d.manager.email))e.push("담당자 이메일");if(!d.client.name)e.push("제안처 기관명");if(!d.svc.length&&!(d.useAI&&d.svcAuto))e.push("제안 서비스(1개 이상)");return e}
 
 /* ---------- model ---------- */
@@ -491,6 +500,9 @@ function aiPrompt(m){const d=m.input,keys=ORDER.map(k=>`"${k}"`).join(" | ");
 """
 ${d.raw||"별도 요구사항 없음"}
 """
+${d.org?`[제안처 최근 동향 — 웹 검색 요약, 참고용]
+${orgText(d.org)}
+`:""}
 
 [닥터빌 서비스 사실]
 ${ORDER.map(svcFacts).join("\n")}
@@ -500,6 +512,7 @@ ${ORDER.map(svcFacts).join("\n")}
 
 규칙:
 - 위에 없는 수치·실적·고객사·가격·할인·계약 조건을 만들지 마세요. 원문에 있는 목표 수치는 '목표'로만 언급하세요.
+- 제안처 최근 동향은 제안 배경과 대응 방안의 맥락으로만 쓰고, 언급할 때는 요약에 있는 사실만 쓰세요(매출 등 수치는 인용하지 마세요).
 - kpis에는 원문에 나온 목표 수치·지표만 넣고, 없으면 빈 배열로 두세요.
 - reqMap의 need는 원문 내용을 요약한 것이어야 하며, solution과 product는 위 서비스·상품 사실 안에서만 고르세요.
 - recommend에는 요구사항 달성에 필요한 서비스 키만 넣으세요(${keys}). 담당자가 선택한 서비스가 맞지 않아도 빼지 말고 그대로 두세요.
@@ -537,80 +550,102 @@ function merge(m,o){if(!o||typeof o!=="object")return m;const d=m.input,t=TYPES[
   if(!r.analysis&&r.reqMap.length)r.analysis={summary:"",objectives:[],targets:[],kpis:[]};
   r.recReason=str(o.recReason,90)||"";return r}
 
-/* ---------- Claude 엔진: claude.ai(sample) 또는 Anthropic API ---------- */
-const API_URL="https://api.anthropic.com/v1";let apiKeyMem="";
-const LS="dv_api";function lsGet(){try{return JSON.parse(localStorage.getItem(LS)||"null")}catch(e){return null}}
-function lsSet(v){try{v?localStorage.setItem(LS,JSON.stringify(v)):localStorage.removeItem(LS)}catch(e){}}
-function apiKey(){return ($("apiKey").value||apiKeyMem).trim()}
-function apiHeaders(k){return{"x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true","content-type":"application/json"}}
-function apiErr(status,body){const t=body&&body.error&&body.error.type;const e=new Error((body&&body.error&&body.error.message)||("HTTP "+status));
-  e.code=status===401?"bad_key":status===403?"forbidden":status===404||t==="not_found_error"?"bad_model":status===429?"rate_limited":status===529||t==="overloaded_error"?"overloaded":status===400?"bad_request":"api_error";return e}
-async function apiJSON(prompt,signal,onProgress){const k=apiKey();if(!k){const e=new Error("no key");e.code="no_key";throw e}
-  let res;try{res=await fetch(API_URL+"/messages",{method:"POST",headers:apiHeaders(k),signal,
-    body:JSON.stringify({model:$("apiModel").value.trim()||"claude-sonnet-5-5",max_tokens:6000,stream:true,messages:[{role:"user",content:prompt}]})})}
-  catch(x){if(x&&x.name==="AbortError"){const e=new Error("cancelled");e.code="cancelled";throw e}const e=new Error("network");e.code="network";throw e}
-  if(!res.ok){const body=await res.json().catch(()=>null);throw apiErr(res.status,body)}
-  // 스트리밍(SSE)으로 받아 긴 응답에서도 연결이 끊기지 않게 합니다.
-  const rd=res.body.getReader(),dec=new TextDecoder();let buf="",text="";
-  try{for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
-    while((i=buf.indexOf("\n\n"))>=0){const chunk=buf.slice(0,i);buf=buf.slice(i+2);
-      const line=chunk.split("\n").find(l=>l.startsWith("data:"));if(!line)continue;let ev;try{ev=JSON.parse(line.slice(5))}catch(x){continue}
-      if(ev.type==="content_block_delta"&&ev.delta&&ev.delta.type==="text_delta"){text+=ev.delta.text;onProgress&&onProgress(text.length)}
-      else if(ev.type==="error"){throw apiErr(ev.error&&ev.error.type==="overloaded_error"?529:500,ev)}}}}
-  catch(x){if(x&&x.code)throw x;if(x&&x.name==="AbortError"){const e=new Error("cancelled");e.code="cancelled";throw e}const e=new Error("network");e.code="network";throw e}
-  return parseLoose(text)}
-function eng(){return $("llmEngine").value}
-function showEngine(){const l=eng()==="local";$("grpClaude").hidden=l;$("grpLocal").hidden=!l;const st=$("apiState");st.classList.remove("err");
-  st.textContent=l?"Ollama는 OLLAMA_ORIGINS에 이 사이트 주소를 허용해야 브라우저에서 연결됩니다. (README 참고)":"Claude API 키를 입력하고 '연결 확인'을 누르세요."}
-function localBase(){return $("localUrl").value.trim().replace(/\/+$/,"")}
-function localHeaders(){const h={"content-type":"application/json"},k=$("localKey").value.trim();if(k)h.authorization="Bearer "+k;return h}
-async function loadModels(){const st=$("apiState");st.classList.remove("err");st.textContent="연결 확인 중…";
-  try{if(eng()==="local"){const b=localBase();if(!b){const e=new Error();e.code="no_url";throw e}
-      let res;try{res=await fetch(b+"/models",{headers:localHeaders()})}catch(x){const e=new Error();e.code="local_network";throw e}
-      const body=await res.json().catch(()=>null);if(!res.ok){const e=new Error();e.code=res.status===401?"bad_key":"local_error";throw e}
-      const ms=(body&&body.data||[]).map(x=>x.id);$("localModelList").innerHTML=ms.map(id=>`<option value="${esc(id)}">`).join("");
-      if(ms.length&&!ms.includes($("localModel").value.trim()))$("localModel").value=ms[0];
-      st.textContent=ms.length?`로컬 LLM에 연결되었습니다. 사용 모델: ${$("localModel").value} (모델 ${ms.length}개)`:"연결되었지만 설치된 모델이 없습니다. 먼저 모델을 받아 주세요 (예: ollama pull qwen3:14b).";
-      if(!ms.length)st.classList.add("err");savePref();return ms.length>0}
-    const k=apiKey();if(!k){const e=new Error();e.code="no_key";throw e}
-    const res=await fetch(API_URL+"/models?limit=50",{headers:apiHeaders(k)});const body=await res.json().catch(()=>null);if(!res.ok)throw apiErr(res.status,body);
-    const ms=(body.data||[]);$("modelList").innerHTML=ms.map(x=>`<option value="${esc(x.id)}">${esc(x.display_name||x.id)}</option>`).join("");
-    const cur=$("apiModel").value.trim();if(ms.length&&!ms.some(x=>x.id===cur)){const pick=ms.find(x=>/sonnet/.test(x.id))||ms[0];$("apiModel").value=pick.id}
-    st.textContent=`Claude API에 연결되었습니다. 사용 모델: ${$("apiModel").value} (모델 ${ms.length}개)`;savePref();return true}
-  catch(x){st.textContent=ERRMSG[x&&x.code]||"연결하지 못했습니다. 네트워크 또는 키를 확인하세요.";st.classList.add("err");return false}}
-function savePref(){if($("apiRemember").checked)lsSet({e:eng(),k:apiKey(),m:$("apiModel").value.trim(),u:$("localUrl").value.trim(),lm:$("localModel").value.trim(),lk:$("localKey").value.trim()});else lsSet(null)}
-const saveKeyPref=savePref;
+/* ---------- AI 엔진: claude.ai(내장 Claude + Exa 웹검색) 또는 배포 사이트(API 프록시) ---------- */
+const mcpP=(window.claude&&window.claude.use)?window.claude.use("mcp"):Promise.resolve(null);
+const API_BASE=String(window.DV_API_BASE||"").replace(/\/+$/,"");
+const LS="dv_access";function lsGet(){try{return localStorage.getItem(LS)||""}catch(e){return""}}function lsSet(v){try{v?localStorage.setItem(LS,v):localStorage.removeItem(LS)}catch(e){}}
+let accessCode=lsGet();
+function err(code,msg){const e=new Error(msg||code);e.code=code;return e}
 function parseLoose(text){let t=String(text||"").replace(/<think>[\s\S]*?<\/think>/g,"").replace(/```(?:json)?/g,"");const a=t.indexOf("{"),z=t.lastIndexOf("}");
-  if(a<0||z<a){const e=new Error("parse");e.code="parse";throw e}t=t.slice(a,z+1);
-  try{return JSON.parse(t)}catch(x){try{return JSON.parse(t.replace(/,\s*([}\]])/g,"$1"))}catch(y){const e=new Error("parse");e.code="parse";throw e}}}
-async function localJSON(prompt,signal,onProgress){const b=localBase(),model=$("localModel").value.trim();
-  if(!b){const e=new Error();e.code="no_url";throw e}if(!model){const e=new Error();e.code="no_local_model";throw e}
-  let res;try{res=await fetch(b+"/chat/completions",{method:"POST",headers:localHeaders(),signal,body:JSON.stringify({model,stream:true,temperature:0.3,
-      messages:[{role:"system",content:"You are a precise assistant. Reply with a single valid JSON object only, written in Korean. No markdown, no explanations."},{role:"user",content:prompt}]})})}
-  catch(x){if(x&&x.name==="AbortError"){const e=new Error();e.code="cancelled";throw e}const e=new Error();e.code="local_network";throw e}
-  if(!res.ok){const e=new Error("HTTP "+res.status);e.code=res.status===404?"bad_model":res.status===401?"bad_key":"local_error";throw e}
+  if(a<0||z<a)throw err("parse");t=t.slice(a,z+1);
+  try{return JSON.parse(t)}catch(x){try{return JSON.parse(t.replace(/,\s*([}\]])/g,"$1"))}catch(y){throw err("parse")}}}
+async function proxyFetch(path,body,signal){if(!API_BASE)throw err("no_engine");let res;
+  try{res=await fetch(API_BASE+path,{method:"POST",headers:{"content-type":"application/json",...(accessCode?{"x-access-code":accessCode}:{})},body:JSON.stringify(body),signal})}
+  catch(x){if(x&&x.name==="AbortError")throw err("cancelled");throw err("network")}
+  if(!res.ok){const b=await res.json().catch(()=>null);const c=(b&&b.error&&b.error.code)||(res.status===429?"rate_limited":"api_error");
+    if(c==="access_code")showAccess(true);throw err(c)}
+  return res}
+async function proxyAnalyze(prompt,signal,onProgress){const res=await proxyFetch("/analyze",{prompt},signal);
   const rd=res.body.getReader(),dec=new TextDecoder();let buf="",text="";
   try{for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let i;
-    while((i=buf.indexOf("\n"))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);if(!line.startsWith("data:"))continue;const dat=line.slice(5).trim();if(dat==="[DONE]")continue;
-      try{const ev=JSON.parse(dat),c=ev.choices&&ev.choices[0]&&ev.choices[0].delta&&ev.choices[0].delta.content;if(c){text+=c;onProgress&&onProgress(text.length)}}catch(x){}}}}
-  catch(x){if(x&&x.name==="AbortError"){const e=new Error();e.code="cancelled";throw e}const e=new Error();e.code="local_network";throw e}
+    while((i=buf.indexOf("\n\n"))>=0){const chunk=buf.slice(0,i);buf=buf.slice(i+2);const line=chunk.split("\n").find(l=>l.startsWith("data:"));if(!line)continue;
+      let ev;try{ev=JSON.parse(line.slice(5))}catch(x){continue}
+      if(ev.type==="content_block_delta"&&ev.delta&&ev.delta.type==="text_delta"){text+=ev.delta.text;onProgress&&onProgress(text.length)}
+      else if(ev.type==="error")throw err(ev.error&&ev.error.type==="overloaded_error"?"overloaded":"api_error")}}}
+  catch(x){if(x&&x.code)throw x;if(x&&x.name==="AbortError")throw err("cancelled");throw err("network")}
   return parseLoose(text)}
-const ERRMSG={bad_key:"API 키가 올바르지 않습니다. 키를 확인하세요.",forbidden:"이 키로는 해당 기능을 쓸 권한이 없습니다.",bad_model:"모델 이름을 확인하세요. '연결 확인'으로 사용 가능한 모델을 불러올 수 있습니다.",
-  rate_limited:"요청이 많아 잠시 후 다시 시도하세요.",overloaded:"Claude 서버가 혼잡합니다. 잠시 후 다시 시도하세요.",network:"Claude API에 연결하지 못했습니다. 인터넷 연결 또는 사내 방화벽을 확인하세요.",
-  parse:"LLM 응답에서 결과를 읽지 못했습니다. 다시 생성하거나 더 큰 모델을 써 보세요.",no_key:"Claude API 키를 입력하세요.",not_granted:"Claude 사용이 허용되지 않았습니다.",cancelled:"작성을 멈췄습니다.",bad_request:"요청 형식 오류입니다. 모델 이름을 확인하세요.",
-  no_url:"로컬 LLM 서버 주소를 입력하세요.",no_local_model:"로컬 LLM 모델을 입력하거나 '연결 확인'으로 불러오세요.",local_error:"로컬 LLM 서버가 오류를 반환했습니다. 모델 이름과 서버 상태를 확인하세요.",
-  local_network:"로컬 LLM에 연결하지 못했습니다. 서버 실행 여부와 CORS 허용(OLLAMA_ORIGINS) 설정, 브라우저의 로컬 네트워크 접근 허용을 확인하세요."};
-let engine=null; // "sample" | "api" | "local"
+const ERRMSG={no_engine:"이 화면에서는 AI 분석을 쓸 수 없습니다.",network:"AI 서버에 연결하지 못했습니다. 인터넷 연결을 확인하세요.",parse:"AI 응답을 읽지 못했습니다. 다시 시도하세요.",
+  rate_limited:"요청이 많아 잠시 후 다시 시도하세요.",overloaded:"AI 서버가 혼잡합니다. 잠시 후 다시 시도하세요.",access_code:"팀 접근 코드를 입력하세요.",
+  not_configured:"AI 서버에 API 키가 아직 등록되지 않았습니다. 관리자에게 문의하세요.",forbidden_origin:"허용되지 않은 주소에서 접속했습니다.",not_granted:"Claude 사용이 허용되지 않았습니다.",cancelled:"작업을 멈췄습니다.",
+  api_error:"AI 서버가 오류를 반환했습니다. 잠시 후 다시 시도하세요.",bad_request:"요청 내용이 너무 길거나 형식이 맞지 않습니다.",
+  no_search:"웹 검색(Exa 커넥터)을 쓸 수 없어 기관 정보를 찾지 못했습니다. claude.ai 설정 → 커넥터에서 Exa를 연결하세요."};
+let engine=null; // "sample" | "proxy"
+async function aiAvailable(){return !!(await sampleP)||!!API_BASE}
 async function runAI(prompt,signal){const sample=await sampleP;if(sample){engine="sample";return sample.json(prompt,{modelTier:"default",signal})}
-  const prog=n=>status(`LLM이 요구사항을 분석하고 있습니다… (${n.toLocaleString()}자 수신)`);
-  if(eng()==="local"){engine="local";return localJSON(prompt,signal,prog)}engine="api";return apiJSON(prompt,signal,prog)}
+  engine="proxy";return proxyAnalyze(prompt,signal,n=>status(`AI가 요구사항을 분석하고 있습니다… (${n.toLocaleString()}자 수신)`))}
+function showAccess(v){$("accessBox").hidden=!v;if(v){status(ERRMSG.access_code,true);$("accessCode").focus()}}
+
+/* ---------- 기관 최신 정보 ---------- */
+const orgCache=new Map();let orgCur="",orgCtl=null;
+function orgFor(name){return orgCache.get(name)||null}
+function orgText(o){return [o.profile&&("개요: "+o.profile),...(o.updates||[]).map(u=>`- ${u.date?u.date+" ":""}${u.title}${u.summary?": "+u.summary:""}`),
+  o.focus&&o.focus.length&&("주력 분야: "+o.focus.join(", ")),...(o.implications||[]).map(x=>"시사점: "+x)].filter(Boolean).join("\n")}
+function researchPrompt(name,type,results){const svc=ORDER.map(k=>SERVICES[k].name+"("+SERVICES[k].items.map(i=>i[0]).join("·")+")").join(", ");
+  return `당신은 의료 B2B 플랫폼 '닥터빌'의 제안 리서처입니다. ${results?"아래 웹 검색 결과만":"웹 검색으로 찾은 자료만"} 근거로 제안처 '${name}'(${type})의 최근 동향을 한국어로 요약하세요.
+오늘 날짜: ${today()}. 최근 6개월 이내 소식을 우선하고, 날짜를 확인할 수 없는 내용은 date를 빈 문자열로 두세요.
+동명의 다른 기관 자료는 제외하고, 기관을 특정하기 어려우면 profile에 그 사실을 적으세요. 자료에 없는 내용은 만들지 마세요.
+닥터빌 서비스: ${svc}.
+${results?`[웹 검색 결과]\n${results}\n`:""}
+JSON만 출력하세요:
+{"name":"확인된 정식 기관명","profile":"기관 개요 1~2문장, 100자 이내",
+ "updates":[{"date":"YYYY.MM.DD","title":"소식 제목 40자 이내","summary":"핵심 내용 70자 이내","url":"출처 URL"}],
+ "focus":["주력 제품·질환군·사업 분야 2~5개, 각 20자 이내"],
+ "implications":["닥터빌 제안 요구사항에 반영할 만한 시사점 2~4개, 각 60자 이내 (예: 신제품 런칭 → 런칭 웹심포지엄)"],
+ "keywords":["요구사항 작성용 키워드 3~6개"]}
+updates는 3~6개로 작성하세요.`}
+async function researchSample(name,type,signal){const mcp=await mcpP,sample=await sampleP;if(!mcp||!sample)throw err("no_search");
+  let raw;try{const r=await mcp.callTool("Exa","web_search_exa",{query:`${name} 최근 뉴스 신제품 사업 동향 ${new Date().getFullYear()}`,
+      objective:`${name}(${type})의 최근 6개월 주요 뉴스: 신제품·허가·학술 마케팅·사업 확장. 날짜와 핵심 사실을 뽑고, 동명의 다른 기관은 제외`,numResults:8},{signal,cache:{staleTime:3600000,gcTime:3600000}});
+    raw=typeof r.payload==="string"?r.payload:JSON.stringify(r.payload||r.content)}
+  catch(x){const c=x&&x.code;throw err(["server_not_connected","not_in_manifest","needs_reauth","selection_required","not_granted","capability_disabled","approval_required"].includes(c)?"no_search":(c||"no_search"),x&&x.message)}
+  return sample.json(researchPrompt(name,type,String(raw).slice(0,24000)),{modelTier:"default",signal})}
+async function researchProxy(name,type,signal){const res=await proxyFetch("/research",{org:name,type},signal);return res.json()}
+function cleanOrg(o){const ups=Array.isArray(o&&o.updates)?o.updates.map(u=>u&&({date:str(u.date,20)||"",title:str(u.title,60),summary:str(u.summary,110)||"",url:/^https?:\/\//.test(u.url||"")?u.url:""})).filter(u=>u&&u.title).slice(0,6):[];
+  const src=Array.isArray(o&&o.sources)?o.sources.filter(x=>x&&/^https?:\/\//.test(x.url||"")).slice(0,8).map(x=>({url:x.url,title:str(x.title,60)||x.url})):[];
+  return{name:str(o&&o.name,60)||"",profile:str(o&&o.profile,160)||"",updates:ups,focus:arr(o&&o.focus,5,30),implications:arr(o&&o.implications,4,90),keywords:arr(o&&o.keywords,6,20),sources:src,at:today()}}
+function renderOrg(o){const b=$("orgBody");if(!o){b.innerHTML="";return}
+  const host=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch(e){return""}};
+  b.innerHTML=`${o.profile?`<p>${esc(o.profile)}</p>`:""}
+    ${o.updates.length?`<h5>최근 동향</h5><ul>${o.updates.map(u=>`<li>${u.date?`<small>${esc(u.date)}</small> `:""}<b>${esc(u.title)}</b>${u.summary?` — ${esc(u.summary)}`:""}${u.url?` <a href="${esc(u.url)}" target="_blank" rel="noopener">${esc(host(u.url))}</a>`:""}</li>`).join("")}</ul>`:""}
+    ${o.focus.length?`<h5>주력 분야</h5><div class="chips">${o.focus.map(f=>`<span>${esc(f)}</span>`).join("")}</div>`:""}
+    ${o.implications.length?`<h5>요구사항 참고 포인트</h5><ul class="imp">${o.implications.map((x,i)=>`<li><span>${esc(x)}</span><button type="button" class="add" data-i="${i}">+ 요구사항</button></li>`).join("")}</ul>
+      <button type="button" class="add addall" id="orgAddAll">참고 포인트 모두 요구사항에 추가</button>`:""}
+    ${o.sources.length?`<div class="src">출처: ${o.sources.map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(host(x.url))}</a>`).join("")}</div>`:""}`;
+  b.querySelectorAll(".imp .add").forEach(btn=>btn.onclick=()=>{addReq(o.implications[+btn.dataset.i]);btn.disabled=true;btn.textContent="추가됨"});
+  const all=$("orgAddAll");if(all)all.onclick=()=>{o.implications.forEach(addReq);b.querySelectorAll(".imp .add").forEach(x=>{x.disabled=true;x.textContent="추가됨"});all.disabled=true}}
+function addReq(t){const ta=$("reqs"),v=ta.value.replace(/\s+$/,"");if(v.includes(t))return;ta.value=(v?v+"\n":"")+"- "+t;ta.dispatchEvent(new Event("input"))}
+function orgState(t,e){const s=$("orgState");s.textContent=t;s.classList.toggle("err",!!e)}
+async function lookupOrg(force){const name=$("cName").value.trim();
+  if(name.length<2||/^\(예시\)/.test(name)){orgState("기관명을 입력하면 최근 뉴스·동향을 찾아 요약합니다.");renderOrg(null);orgCur="";return}
+  if(!force&&name===orgCur)return;orgCur=name;
+  if(!force&&orgCache.has(name)){const o=orgCache.get(name);renderOrg(o);orgState(`${o.at} 기준 웹 검색 요약입니다. 사실 여부는 출처에서 확인하세요.`);return}
+  const sample=await sampleP,mcp=await mcpP;
+  if(!(sample&&mcp)&&!API_BASE){orgState(sample?ERRMSG.no_search:"이 화면에서는 기관 정보 조회를 쓸 수 없습니다. 배포 사이트 또는 claude.ai 게시본에서 사용하세요.",true);return}
+  if(orgCtl)orgCtl.abort();const ctl=orgCtl=new AbortController();$("orgBtn").disabled=true;renderOrg(null);
+  orgState(`'${name}' 최근 정보를 웹에서 찾고 있습니다. 20~60초 걸립니다.`);const type=$("cType").value;
+  try{const raw=(sample&&mcp)?await researchSample(name,type,ctl.signal):await researchProxy(name,type,ctl.signal);if(ctl!==orgCtl)return;
+    const o=cleanOrg(raw);if(!o.profile&&!o.updates.length)throw err("empty");orgCache.set(name,o);renderOrg(o);
+    orgState(`${o.at} 기준 웹 검색 요약입니다. 사실 여부는 출처에서 확인하세요.`)}
+  catch(x){if(ctl!==orgCtl)return;const c=x&&x.code;if(c==="cancelled")return;orgCur="";
+    orgState(c==="empty"?"관련 정보를 찾지 못했습니다. 기관명을 정식 명칭으로 입력해 보세요.":(ERRMSG[c]||"기관 정보를 가져오지 못했습니다.")+" '조회'로 다시 시도할 수 있습니다.",true)}
+  finally{if(ctl===orgCtl){$("orgBtn").disabled=false;orgCtl=null}}}
 
 /* ---------- UI flow ---------- */
 let model=null,busy=false,ctl=null;
 function setStep(n){[1,2,3].forEach(i=>{const e=$("st"+i);e.classList.toggle("done",i<n);e.classList.toggle("on",i===n)})}
 function status(t,err){const s=$("status");s.textContent=t;s.classList.toggle("err",!!err)}
 let toastT;function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3200)}
-function render(){$("preview").innerHTML=brochureHTML(model);$("pvLabel").textContent=`웹브로셔 미리보기 · ${model.input.client.name}${model.ai?" · LLM 요구사항 분석 반영":""}`}
+function render(){$("preview").innerHTML=brochureHTML(model);$("pvLabel").textContent=`웹브로셔 미리보기 · ${model.input.client.name}${model.ai?" · AI 요구사항 분석 반영":""}`}
 
 function syncChecks(svc){document.querySelectorAll("#svcChecks input").forEach(c=>c.checked=svc.includes(c.value))}
 $("form").addEventListener("submit",async ev=>{ev.preventDefault();if(busy)return;
@@ -619,14 +654,13 @@ $("form").addEventListener("submit",async ev=>{ev.preventDefault();if(busy)retur
   if(!d.svc.length)d.svc=(TYPES[d.client.type]||TYPES["기타"]).rec.slice();
   $("sampleBadge").hidden=true;model=baseModel(d);render();setStep(2);$("htmlBtn").disabled=false;$("pptBtn").disabled=false;
   if(!d.useAI){status("기본 문구로 웹브로셔를 만들었습니다.");return}
-  const sample=await sampleP;if(!sample){const miss=eng()==="local"?(!localBase()?"no_url":!$("localModel").value.trim()?"no_local_model":""):(!apiKey()?"no_key":"");
-    if(miss){status(ERRMSG[miss]+" 지금은 기본 문구입니다. 아래 'LLM 연결'을 설정하고 다시 생성하세요.",true);return}}
-  busy=true;$("genBtn").disabled=true;$("genBtn").textContent="요구사항 분석 중…";status(eng()==="local"&&!window.claude?"로컬 LLM이 요구사항을 분석하고 있습니다. PC 성능에 따라 1~5분 걸릴 수 있습니다.":"Claude가 요구사항을 분석하고 제안 문구를 쓰고 있습니다. 보통 20~60초 걸립니다.");
+  if(!(await aiAvailable())){status("이 화면에서는 AI 분석을 쓸 수 없어 기본 문구로 만들었습니다.",true);return}
+  busy=true;$("genBtn").disabled=true;$("genBtn").textContent="요구사항 분석 중…";status("AI가 요구사항을 분석하고 제안 문구를 쓰고 있습니다. 보통 20~60초 걸립니다.");
   ctl=new AbortController();
-  try{const o=await runAI(aiPrompt(model),ctl.signal);model=merge(model,o);syncChecks(model.input.svc);render();if(engine!=="sample")savePref();
+  try{const o=await runAI(aiPrompt(model),ctl.signal);model=merge(model,o);syncChecks(model.input.svc);render();if(engine==="proxy"&&accessCode)lsSet(accessCode);
     const add=model.added&&model.added.length?` 추천 서비스(${model.added.map(k=>SERVICES[k].name).join(", ")})를 추가했습니다.`:"";
     status(`요구사항 분석과 맞춤 문구를 반영했습니다.${add} 내용 확인 후 HTML 저장 또는 PPT 생성을 누르세요.`)}
-  catch(x){const c=x&&x.code;status((ERRMSG[c]||"Claude 응답을 받지 못했습니다.")+(c==="cancelled"?"":" 지금은 기본 문구입니다."),c!=="cancelled")}
+  catch(x){const c=x&&x.code;status((ERRMSG[c]||"AI 응답을 받지 못했습니다.")+(c==="cancelled"?"":" 지금은 기본 문구입니다."),c!=="cancelled")}
   finally{busy=false;$("genBtn").disabled=false;$("genBtn").textContent="웹브로셔 다시 생성"}});
 
 async function saveFile(name,blob){
@@ -807,14 +841,11 @@ $("pptBtn").addEventListener("click",async()=>{if(!model||busy)return;if(typeof 
   try{const r=await buildPPT(model);setStep(4);await saveFile(fname("pptx"),r.blob);status(`PPT ${r.n}장(16:9)을 만들었습니다.`)}
   catch(e){console.error(e);status("PPT를 만들지 못했습니다. 입력값을 확인하고 다시 시도하세요.",true)}
   finally{b.disabled=false;b.textContent="PPT 생성 (16:9)"}});
-window.__dv={localJSON,parseLoose,buildPPT,get model(){return model},set model(v){model=v},brochureHTML,merge,aiPrompt,apiJSON,render:()=>render()};
+window.__dv={parseLoose,lookupOrg,orgCache,researchPrompt,buildPPT,get model(){return model},set model(v){model=v},brochureHTML,merge,aiPrompt,render:()=>render()};
 
-/* ---------- API 설정 ---------- */
-(()=>{const v=lsGet();if(v){$("apiRemember").checked=true;if(v.e)$("llmEngine").value=v.e;if(v.k)$("apiKey").value=v.k;if(v.m)$("apiModel").value=v.m;if(v.u)$("localUrl").value=v.u;if(v.lm)$("localModel").value=v.lm;if(v.lk)$("localKey").value=v.lk}
-  showEngine();if(v)$("apiState").textContent="저장된 설정을 불러왔습니다. '연결 확인'으로 점검할 수 있습니다."})();
-$("llmEngine").onchange=()=>{showEngine();savePref()};$("apiTest").onclick=()=>loadModels();
-$("apiRemember").onchange=savePref;["apiKey","apiModel","localUrl","localModel","localKey"].forEach(id=>$(id).addEventListener("change",()=>{if($("apiRemember").checked)savePref()}));
-sampleP.then(sm=>{if(sm){$("apiBox").hidden=true}});
+/* ---------- 기관 정보 · 접근 코드 ---------- */
+$("cName").addEventListener("change",()=>lookupOrg(false));$("orgBtn").onclick=()=>lookupOrg(true);
+$("accessOk").onclick=()=>{accessCode=$("accessCode").value.trim();lsSet(accessCode);$("accessBox").hidden=true;status("접근 코드를 저장했습니다. 다시 생성하거나 조회하세요.")};
 
 /* ---------- initial example ---------- */
 fill(EXAMPLE);model=baseModel(read());render();setStep(1);
