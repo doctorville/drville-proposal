@@ -38,17 +38,22 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 @media (min-width:901px){.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px);max-height:calc(100vh - 84px);overflow:auto}}
 fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}
 legend{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--app-accent);margin-bottom:6px;padding:0}
-label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--app-mute);font-weight:500}
+label.f{display:flex;flex-direction:column;justify-content:flex-end;gap:5px;font-size:12px;line-height:18px;color:var(--app-mute);font-weight:500;min-width:0}
 label.f b{color:#E5484D;font-weight:700}
 input[type=text],input[type=email],input[type=tel],input[type=date],input[type=password],select,textarea{
-  font:inherit;font-size:14px;color:var(--app-fg);background:var(--app-field);border:1px solid var(--app-line);border-radius:6px;padding:8px 10px;width:100%}
-textarea{min-height:92px;resize:vertical}
+  font:inherit;font-size:14px;line-height:20px;color:var(--app-fg);background:var(--app-field);border:1px solid var(--app-line);border-radius:6px;padding:0 10px;width:100%;margin:0;display:block}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=password],select{height:40px;-webkit-appearance:none;appearance:none}
+select{padding-right:30px;background-image:linear-gradient(45deg,transparent 50%,var(--app-mute) 50%),linear-gradient(135deg,var(--app-mute) 50%,transparent 50%);background-position:calc(100% - 15px) 18px,calc(100% - 10px) 18px;background-size:5px 5px;background-repeat:no-repeat}
+input[type=date]::-webkit-calendar-picker-indicator{margin:0;opacity:.7}
+textarea{min-height:96px;padding:9px 10px;resize:vertical}
 input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--app-accent);outline-offset:1px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.checks{display:flex;flex-direction:column;gap:6px}
-.checks label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--app-fg);cursor:pointer}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end}
+.checks{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:10px 12px;border:1px solid var(--app-line);border-radius:6px;background:var(--app-field)}
+.checks label{display:flex;align-items:center;gap:10px;font-size:14px;line-height:20px;color:var(--app-fg);cursor:pointer}
+.checks input,.toggle input{width:16px;height:16px;margin:0;flex:none;accent-color:var(--app-accent)}
 .note{font-size:12px;background:var(--app-warn-bg);color:var(--app-warn-fg);border-radius:6px;padding:8px 10px;line-height:1.5}
-.toggle{display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer}
+.toggle{display:grid;grid-template-columns:16px minmax(0,1fr);gap:10px;align-items:start;font-size:13px;line-height:20px;cursor:pointer}
+.toggle input{margin-top:2px}
 .toggle small{display:block;color:var(--app-mute);font-size:12px}
 .actions{display:flex;flex-direction:column;gap:8px}
 .btn{font:inherit;font-weight:700;font-size:14px;border-radius:6px;padding:11px 14px;cursor:pointer;border:1px solid var(--app-accent);background:var(--app-accent);color:var(--app-accent-ink);display:flex;justify-content:center;gap:8px}
@@ -63,8 +68,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--app-warn-bg);color:var(--app-warn-fg)}
 .frame{border:1px solid var(--app-line);border-radius:10px;overflow:hidden;background:#fff}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:#0E1B2A;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:20;max-width:calc(100% - 32px)}
-.logo-up{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--app-mute);flex-wrap:wrap}
-.logo-up button{font:inherit;font-size:12px;background:none;border:1px solid var(--app-line);color:var(--app-fg);border-radius:6px;padding:4px 8px;cursor:pointer}
+.logo-up{display:flex;align-items:center;gap:8px;font-size:12px;line-height:18px;color:var(--app-mute);flex-wrap:wrap}
+.logo-up button{font:inherit;font-size:12px;line-height:18px;height:28px;background:none;border:1px solid var(--app-line);color:var(--app-fg);border-radius:6px;padding:0 10px;cursor:pointer}
 [hidden]{display:none!important}
 .org{border:1px solid var(--app-line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--app-field);min-width:0}
 .org-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}
@@ -238,19 +243,19 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     <fieldset>
       <legend>제안담당자</legend>
       <div class="row2">
-        <label class="f">이름 <b>*</b><input type="text" id="mName" required autocomplete="name"></label>
+        <label class="f"><span>이름 <b>*</b></span><input type="text" id="mName" required autocomplete="name"></label>
         <label class="f">직함<input type="text" id="mTitle"></label>
       </div>
       <label class="f">소속<input type="text" id="mOrg"></label>
       <div class="row2">
-        <label class="f">이메일 <b>*</b><input type="email" id="mEmail" required></label>
+        <label class="f"><span>이메일 <b>*</b></span><input type="email" id="mEmail" required></label>
         <label class="f">연락처<input type="tel" id="mPhone"></label>
       </div>
     </fieldset>
 
     <fieldset>
       <legend>제안처</legend>
-      <label class="f">기관명 <b>*</b><input type="text" id="cName" required placeholder="예: 대웅제약"></label>
+      <label class="f"><span>기관명 <b>*</b></span><input type="text" id="cName" required placeholder="예: 대웅제약"></label>
       <section class="org" id="orgBox" aria-live="polite">
         <div class="org-h"><b>기관 최신 정보</b><button type="button" id="orgBtn">조회</button></div>
         <p class="org-st" id="orgState">기관명을 입력하면 최근 뉴스·동향을 찾아 요약합니다.</p>
@@ -289,7 +294,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
     <div class="access" id="accessBox" hidden>
       <label class="f">팀 접근 코드<input type="password" id="accessCode" autocomplete="off" spellcheck="false"></label>
-      <button type="button" class="btn ghost" id="accessOk" style="padding:8px 10px">확인</button>
+      <button type="button" class="btn ghost" id="accessOk" style="height:40px;padding:0 14px;align-items:center">확인</button>
     </div>
 
     <div class="actions">
