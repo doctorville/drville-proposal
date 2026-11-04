@@ -59,7 +59,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .btn{font:inherit;font-weight:700;font-size:14px;border-radius:6px;padding:11px 14px;cursor:pointer;border:1px solid var(--app-accent);background:var(--app-accent);color:var(--app-accent-ink);display:flex;justify-content:center;gap:8px}
 .btn.ghost{background:transparent;color:var(--app-accent)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btnrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.btnrow .btn{padding-inline:8px;white-space:nowrap}
+.fmt-note{font-size:11px;color:var(--app-mute);margin:-2px 0 0;text-align:right}
 .status{font-size:12px;color:var(--app-mute);min-height:18px}
 .status.err{color:#E5484D}
 .err-msg{font-size:12px;color:#E5484D}
@@ -252,7 +254,7 @@ input[type=url]:focus-visible{outline:2px solid var(--app-accent);outline-offset
 <header class="topbar">
   <h1><span id="appLogo"></span>제안서 생성기</h1>
   <div class="steps" aria-label="진행 단계">
-    <span class="step on" id="st1">1 입력</span><span class="step" id="st2">2 웹브로셔</span><span class="step" id="st3">3 PPT 16:9</span>
+    <span class="step on" id="st1">1 입력</span><span class="step" id="st2">2 웹브로셔</span><span class="step" id="st3">3 PPT·PDF 16:9</span>
   </div>
 </header>
 
@@ -333,8 +335,10 @@ input[type=url]:focus-visible{outline:2px solid var(--app-accent);outline-offset
       <button class="btn" type="submit" id="genBtn">웹브로셔 생성</button>
       <div class="btnrow">
         <button class="btn ghost" type="button" id="htmlBtn" disabled>HTML 저장</button>
-        <button class="btn ghost" type="button" id="pptBtn" disabled>PPT 생성 (16:9)</button>
+        <button class="btn ghost" type="button" id="pptBtn" disabled>PPT 저장</button>
+        <button class="btn ghost" type="button" id="pdfBtn" disabled>PDF 저장</button>
       </div>
+      <p class="fmt-note">PPT·PDF는 16:9 가로형, 같은 구성으로 만듭니다.</p>
       <p class="status" id="status" role="status"></p>
     </div>
   </form>
@@ -347,6 +351,7 @@ input[type=url]:focus-visible{outline:2px solid var(--app-accent);outline-offset
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="config.js"></script>
 <script>
 (function(){
@@ -798,7 +803,7 @@ $("form").addEventListener("submit",async ev=>{ev.preventDefault();if(busy)retur
   const d=read(),e=validate(d);const em=$("err");
   if(e.length){em.textContent=`다음 항목을 입력하세요: ${e.join(", ")}`;em.hidden=false;return}em.hidden=true;
   if(!d.svc.length)d.svc=(TYPES[d.client.type]||TYPES["기타"]).rec.slice();
-  $("sampleBadge").hidden=true;model=baseModel(d);render();setStep(2);$("htmlBtn").disabled=false;$("pptBtn").disabled=false;
+  $("sampleBadge").hidden=true;model=baseModel(d);render();setStep(2);$("htmlBtn").disabled=false;$("pptBtn").disabled=false;$("pdfBtn").disabled=false;
   if(!d.useAI){status("기본 문구로 웹브로셔를 만들었습니다.");return}
   if(!(await aiAvailable())){status("이 화면에서는 AI 분석을 쓸 수 없어 기본 문구로 만들었습니다.",true);return}
   if((d.concept||refUrls.length)&&conceptKey()!==conceptApplied)applyConcept();
@@ -806,7 +811,7 @@ $("form").addEventListener("submit",async ev=>{ev.preventDefault();if(busy)retur
   ctl=new AbortController();
   try{const o=await runAI(aiPrompt(model),ctl.signal);model=merge(model,o);syncChecks(model.input.svc);render();if(engine==="proxy"&&accessCode)lsSet(accessCode);
     const add=model.added&&model.added.length?` 추천 서비스(${model.added.map(k=>SERVICES[k].name).join(", ")})를 추가했습니다.`:"";
-    status(`요구사항 분석과 맞춤 문구를 반영했습니다.${add} 내용 확인 후 HTML 저장 또는 PPT 생성을 누르세요.`)}
+    status(`요구사항 분석과 맞춤 문구를 반영했습니다.${add} 내용 확인 후 HTML·PPT·PDF 저장을 누르세요.`)}
   catch(x){const c=x&&x.code;status((ERRMSG[c]||"AI 응답을 받지 못했습니다.")+(c==="cancelled"?"":" 지금은 기본 문구입니다."),c!=="cancelled")}
   finally{busy=false;$("genBtn").disabled=false;$("genBtn").textContent="웹브로셔 다시 생성"}});
 
@@ -830,8 +835,8 @@ function iconPNG(){return new Promise(res=>{const im=new Image();im.onload=()=>{
   im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(ICON_SVG.replace("<svg ",'<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" '))})}
 async function logoPNG(){if(!customLogo)return null;return new Promise(res=>{const im=new Image();im.onload=()=>{const sc=Math.min(1,900/im.naturalWidth),c=document.createElement("canvas");c.width=Math.round(im.naturalWidth*sc);c.height=Math.round(im.naturalHeight*sc);c.getContext("2d").drawImage(im,0,0,c.width,c.height);res({data:c.toDataURL("image/png"),ar:c.width/c.height})};im.onerror=()=>res(null);im.src=customLogo.url})}
 
-async function buildPPT(m){
-  const P=new PptxGenJS();P.layout="LAYOUT_WIDE";P.author=m.input.manager.name;P.company="엠서클 닥터빌";P.title=`닥터빌 제안서 - ${m.input.client.name}`;
+async function buildPPT(m,REC){
+  const P=REC||new PptxGenJS();P.layout="LAYOUT_WIDE";P.author=m.input.manager.name;P.company="엠서클 닥터빌";P.title=`닥터빌 제안서 - ${m.input.client.name}`;
   const T=theme,KR=BODY[T.body].ppt,D=FONTS[T.display].ppt,W=13.333,h6=x=>String(x).replace("#","");
   const C={navy:h6(T.dark),blue:h6(T.primary),ice:h6(T.light),ink:h6(T.ink),mute:h6(T.mute),line:h6(T.line),white:"FFFFFF",mint:h6(T.accent),soft:h6(T.soft),dim:h6(T.dim),chipc:h6(T.chipc),acc2:h6(T.acc2),fitli:h6(T.fitli),pn:h6(T.pn),dline:h6(T.dline),pod:h6(T.pod)};
   const megaFs=t=>Math.min(72,Math.floor(12*72/(Math.max(8,t.length)*(FONTS[T.display].wide?0.78:0.5))));
@@ -869,7 +874,7 @@ async function buildPPT(m){
   s.addText(`KEY POINTS FOR ${cn}`,{x:7.6,y:2.3,w:4.9,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0});
   const nb=m.introBullets.length,rowH=Math.min(0.72,2.6/nb);
   m.introBullets.forEach((b,i)=>{const y=2.85+i*rowH;s.addText(String(i+1).padStart(2,"0"),{x:7.6,y,w:0.5,h:rowH,fontFace:D,fontSize:20,color:C.blue,margin:0,valign:"top"});
-    s.addText(b,{x:8.15,y:y+0.02,w:4.4,h:rowH,fontFace:KR,fontSize:13,bold:true,color:C.ink,margin:0,valign:"top"})});
+    s.addText(b,{x:8.15,y:y+0.02,w:4.4,h:rowH,fontFace:KR,fontSize:nb>3||b.length>44?11.5:13,bold:true,color:C.ink,margin:0,valign:"top",fit:"shrink"})});
   s.addShape(P.ShapeType.rect,{x:0.6,y:5.95,w:W-1.2,h:0.8,fill:{color:C.navy},line:{type:"none"}});
   s.addText(m.statement,{x:0.9,y:5.95,w:W-1.8,h:0.8,fontFace:KR,fontSize:16,bold:true,color:C.white,margin:0,valign:"middle"});foot(s);
 
@@ -989,8 +994,86 @@ $("pptBtn").addEventListener("click",async()=>{if(!model||busy)return;if(typeof 
   const b=$("pptBtn");b.disabled=true;b.textContent="PPT 만드는 중…";
   try{const r=await buildPPT(model);setStep(4);await saveFile(fname("pptx"),r.blob);status(`PPT ${r.n}장(16:9)을 만들었습니다.`)}
   catch(e){console.error(e);status("PPT를 만들지 못했습니다. 입력값을 확인하고 다시 시도하세요.",true)}
-  finally{b.disabled=false;b.textContent="PPT 생성 (16:9)"}});
-window.__dv={parseLoose,lookupOrg,orgCache,researchPrompt,buildPPT,get model(){return model},set model(v){model=v},brochureHTML,merge,aiPrompt,render:()=>render()};
+  finally{b.disabled=false;b.textContent="PPT 저장"}});
+/* ---------- PDF (16:9) — PPT와 같은 레이아웃을 캔버스로 그려 저장 ---------- */
+function slideRecorder(){const slides=[];
+  return {ShapeType:{rect:"rect",roundRect:"roundRect",ellipse:"ellipse",line:"line"},slides,
+    addSlide(){const s={background:null,ops:[],addText(t,o){s.ops.push(["text",t,o||{}])},addShape(k,o){s.ops.push(["shape",k,o||{}])},
+      addImage(o){s.ops.push(["image",o||{}])},addTable(r,o){s.ops.push(["table",r,o||{}])}};slides.push(s);return s},
+    async write(){return slides}}}
+const PX=144; // 1인치 = 144px → 1920×1080
+function pdfFace(face,T){if(face===FONTS[T.display].ppt)return {fam:FONTS[T.display].css+',"Impact",sans-serif',disp:true};
+  if(face==="Arial Black")return {fam:'"Poppins","Arial Black",sans-serif',w:800};
+  return {fam:BODY[T.body].css+',"Malgun Gothic",sans-serif'}}
+function fontStr(o,T,scale){const f=pdfFace(o.fontFace,T),px=(o.fontSize||18)*2*scale;
+  const wt=f.w||(o.bold?700:400);return {css:`${wt} ${px}px ${f.fam}`,px}}
+const hexc=c=>"#"+String(c||"000000").replace("#","");
+function insetOf(m,dflt){if(Array.isArray(m))return m.map(v=>v*PX);const v=(m==null?dflt:m);return [v,v,v,v].map(x=>x*PX/72)}
+function layoutText(ctx,runs,base,T,maxW,scale){
+  const paras=[[]];
+  for(const r of runs){const o={...base,...(r.options||{})};const parts=String(r.text??"").split("\n");
+    parts.forEach((p,i)=>{if(i>0)paras.push([]);if(p)paras[paras.length-1].push({t:p,o})});if(o.breakLine)paras.push([])}
+  if(paras.length>1&&!paras[paras.length-1].length)paras.pop();
+  const lines=[];let total=0;
+  for(const para of paras){const o0=para[0]?para[0].o:base;const bullet=o0.bullet?"•  ":"";const indent=bullet?(o0.fontSize||18)*2*scale*0.9:0;
+    let line=[],lw=0,lh=0;const push=()=>{const px=Math.max(lh,(o0.fontSize||18)*2*scale),h=px*1.22*(o0.lineSpacingMultiple||1);lines.push({segs:line,w:lw,h,px,pa:0,align:o0.align||base.align||"left"});total+=h;line=[];lw=0;lh=0};
+    if(bullet){const F=fontStr(o0,T,scale);ctx.font=F.css;line.push({t:"•",o:o0,css:F.css,x:0});lw=indent;lh=F.px}
+    for(const seg of para){const F=fontStr(seg.o,T,scale);ctx.font=F.css;ctx.letterSpacing=(seg.o.charSpacing?seg.o.charSpacing*2*scale:0)+"px";
+      const toks=seg.t.split(/(\s+)/).filter(x=>x!=="");
+      for(const tk of toks){let tw=ctx.measureText(tk).width;
+        if(lw+tw>maxW&&lw>indent+0.5&&!/^\s+$/.test(tk)){push();line.isCont=true;lw=indent;}
+        if(/^\s+$/.test(tk)&&lw<=indent+0.5)continue;
+        if(tw>maxW-lw){for(const ch of [...tk]){const cw=ctx.measureText(ch).width;if(lw+cw>maxW&&lw>indent+0.5){push();line.isCont=true;lw=indent}line.push({t:ch,o:seg.o,css:F.css,x:lw});lw+=cw;lh=Math.max(lh,F.px)}continue}
+        line.push({t:tk,o:seg.o,css:F.css,x:lw});lw+=tw;lh=Math.max(lh,F.px)}}
+    push();const pa=(o0.paraSpaceAfter||0)*2*scale;if(pa){const ll=lines[lines.length-1];ll.h+=pa;ll.pa=pa;total+=pa}}
+  ctx.letterSpacing="0px";return {lines,total}}
+function drawTextBox(ctx,text,o,T){const runs=Array.isArray(text)?text:[{text,options:{}}];
+  const [it,ir,ib,il]=insetOf(o.margin,3.6);const x=o.x*PX+il,y=o.y*PX+it,w=Math.max(4,(o.w||1)*PX-il-ir),h=Math.max(4,(o.h||0.3)*PX-it-ib);
+  let scale=1,L=layoutText(ctx,runs,o,T,w,scale);
+  if(o.fit==="shrink"){while(L.total>h&&scale>0.5){scale-=0.05;L=layoutText(ctx,runs,o,T,w,scale)}
+    while(L.lines.some(l=>l.w>w+1)&&scale>0.5){scale-=0.05;L=layoutText(ctx,runs,o,T,w,scale)}}
+  let cy=y+(o.valign==="middle"?(h-L.total)/2:o.valign==="bottom"?h-L.total:0);
+  ctx.textBaseline="alphabetic";
+  for(const ln of L.lines){const off=ln.align==="center"?(w-ln.w)/2:ln.align==="right"?w-ln.w:0;const base=cy+(ln.h-ln.pa-ln.px)/2+ln.px*0.8;
+    for(const sg of ln.segs){ctx.font=sg.css;ctx.letterSpacing=(sg.o.charSpacing?sg.o.charSpacing*2*scale:0)+"px";ctx.fillStyle=hexc(sg.o.color);ctx.fillText(sg.t,x+off+sg.x,base)}
+    cy+=ln.h}
+  ctx.letterSpacing="0px"}
+function drawShape(ctx,k,o){const x=o.x*PX,y=o.y*PX,w=(o.w||0)*PX,h=(o.h||0)*PX;
+  const fill=o.fill&&o.fill.type!=="none"&&o.fill.color?o.fill:null,ln=o.line&&o.line.type!=="none"&&o.line.color?o.line:null;ctx.save();
+  if(k==="line"){if(ln){ctx.strokeStyle=hexc(ln.color);ctx.lineWidth=(ln.width||1)*2;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y+h);ctx.stroke()}ctx.restore();return}
+  ctx.beginPath();if(k==="ellipse")ctx.ellipse(x+w/2,y+h/2,Math.abs(w/2),Math.abs(h/2),0,0,Math.PI*2);
+  else if(k==="roundRect"&&ctx.roundRect)ctx.roundRect(x,y,w,h,(o.rectRadius||0.08)*PX);else ctx.rect(x,y,w,h);
+  if(fill){ctx.globalAlpha=1-(fill.transparency||0)/100;ctx.fillStyle=hexc(fill.color);ctx.fill();ctx.globalAlpha=1}
+  if(ln){ctx.strokeStyle=hexc(ln.color);ctx.lineWidth=(ln.width||1)*2;ctx.stroke()}ctx.restore()}
+function drawTable(ctx,rows,o,T){const colW=o.colW||[];let y=o.y*PX;
+  for(const row of rows){const cells=row.map(c=>typeof c==="string"?{text:c,options:{}}:c);
+    let rh=(o.rowH||0.4)*PX;const lay=cells.map((c,i)=>{const op=c.options||{},[t,r,b,l]=insetOf(op.margin,3.6);const w=(colW[i]||1)*PX-l-r;
+      const L=layoutText(ctx,[{text:c.text,options:{}}],{fontSize:12,...op},T,Math.max(4,w),1);rh=Math.max(rh,L.total+t+b);return {op}});
+    let x=o.x*PX;cells.forEach((c,i)=>{const op=lay[i].op,w=(colW[i]||1)*PX;
+      if(op.fill&&op.fill.color){ctx.fillStyle=hexc(op.fill.color);ctx.fillRect(x,y,w,rh)}
+      const bd=Array.isArray(op.border)?op.border:[];[[x,y,x+w,y],[x+w,y,x+w,y+rh],[x,y+rh,x+w,y+rh],[x,y,x,y+rh]].forEach((p,k)=>{const b=bd[k];if(b&&b.type!=="none"&&b.color){ctx.strokeStyle=hexc(b.color);ctx.lineWidth=(b.pt||1)*2;ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(p[2],p[3]);ctx.stroke()}});
+      drawTextBox(ctx,c.text,{fontSize:12,...op,x:x/PX,y:y/PX,w:w/PX,h:rh/PX,valign:op.valign||"middle"},T);x+=w});
+    y+=rh}}
+async function loadImg(src){return new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.onerror=()=>r(null);im.src=src})}
+async function buildPDF(m){if(!window.jspdf||!window.jspdf.jsPDF)throw err("no_pdf");const T=theme;
+  ensureFonts(T);await Promise.all([`400 40px ${FONTS[T.display].css}`,`700 40px ${FONTS[T.display].css}`,`400 20px ${BODY[T.body].css}`,`700 20px ${BODY[T.body].css}`,`800 20px "Poppins"`].map(f=>document.fonts.load(f,"가A1").catch(()=>null)));
+  const rec=slideRecorder();await buildPPT(m,rec);const slides=rec.slides;
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"in",format:[13.333,7.5],compress:true});
+  doc.setProperties({title:`닥터빌 제안서 - ${m.input.client.name}`,author:m.input.manager.name,creator:"엠서클 닥터빌 제안서 생성기"});
+  const cv=document.createElement("canvas");cv.width=1920;cv.height=1080;const ctx=cv.getContext("2d");const imgs=new Map();
+  for(let i=0;i<slides.length;i++){const s=slides[i];ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle=hexc(s.background&&s.background.color||"FFFFFF");ctx.fillRect(0,0,1920,1080);
+    for(const op of s.ops){if(op[0]==="shape")drawShape(ctx,op[1],op[2]);
+      else if(op[0]==="text")drawTextBox(ctx,op[1],op[2],T);
+      else if(op[0]==="table")drawTable(ctx,op[1],op[2],T);
+      else if(op[0]==="image"){const o=op[1];if(!imgs.has(o.data))imgs.set(o.data,await loadImg(o.data));const im=imgs.get(o.data);if(im)ctx.drawImage(im,o.x*PX,o.y*PX,o.w*PX,o.h*PX)}}
+    if(i>0)doc.addPage([13.333,7.5],"landscape");doc.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",0,0,13.333,7.5,undefined,"FAST")}
+  return {blob:doc.output("blob"),n:slides.length}}
+$("pdfBtn").addEventListener("click",async()=>{if(!model||busy)return;
+  const b=$("pdfBtn");b.disabled=true;b.textContent="PDF 만드는 중…";
+  try{const r=await buildPDF(model);setStep(4);await saveFile(fname("pdf"),r.blob);status(`PDF ${r.n}쪽(16:9)을 만들었습니다. PPT와 같은 구성입니다.`)}
+  catch(e){console.error(e);status(e&&e.code==="no_pdf"?"PDF 라이브러리를 불러오지 못했습니다. 네트워크 확인 후 새로고침하세요.":"PDF를 만들지 못했습니다. 다시 시도하세요.",true)}
+  finally{b.disabled=false;b.textContent="PDF 저장"}});
+window.__dv={buildPDF,parseLoose,lookupOrg,orgCache,researchPrompt,buildPPT,get model(){return model},set model(v){model=v},brochureHTML,merge,aiPrompt,render:()=>render()};
 
 /* ---------- 기관 정보 · 접근 코드 ---------- */
 $("cName").addEventListener("change",()=>lookupOrg(false));$("orgBtn").onclick=()=>lookupOrg(true);
