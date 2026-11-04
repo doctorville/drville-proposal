@@ -69,9 +69,87 @@ export default {
       out.sources = sources.slice(0, 8);
       return json(out);
     }
+    // 3) 참고 사이트 요약: 제목·설명·주요 색·폰트·본문 일부를 추출 (컨셉 적용용)
+    if (url.pathname === "/digest") {
+      const urls = (Array.isArray(body.urls) ? body.urls : []).map(u => String(u || "").trim()).filter(u => /^https?:\/\//i.test(u)).slice(0, 3);
+      if (!urls.length) return fail("bad_request", 400);
+      const sites = await Promise.all(urls.map(siteDigest));
+      return json({ sites });
+    }
     return fail("not_found", 404);
   },
 };
+
+function blockedHost(u) {
+  try {
+    const h = new URL(u).hostname.toLowerCase();
+    return !h.includes(".") || /^(localhost|127\.|10\.|0\.|169\.254\.|192\.168\.)/.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h) || /\.(local|internal|localhost)$/.test(h) || h.startsWith("[");
+  } catch { return true; }
+}
+
+async function getText(u, ms, max) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    const r = await fetch(u, { signal: ctl.signal, redirect: "follow", headers: { "user-agent": "Mozilla/5.0 (compatible; DrVilleProposal/1.0)", "accept": "text/html,text/css,*/*;q=0.8" } });
+    if (!r.ok) throw new Error("http " + r.status);
+    if (blockedHost(r.url)) throw new Error("blocked");
+    const t = await r.text();
+    return { text: t.slice(0, max), url: r.url };
+  } finally { clearTimeout(timer); }
+}
+
+function decodeEnt(s) {
+  return String(s || "").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
+}
+
+function metaContent(html, key) {
+  const re = new RegExp("<meta[^>]+(?:name|property)=[\"']" + key + "[\"'][^>]*>", "i");
+  const tag = (html.match(re) || [""])[0];
+  return decodeEnt((tag.match(/content=["']([^"']*)/i) || [])[1] || "").trim();
+}
+
+function topColors(css) {
+  const cnt = new Map();
+  const add = h => { if (h !== "ffffff" && h !== "000000") cnt.set(h, (cnt.get(h) || 0) + 1); };
+  for (const m of css.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})\b/gi)) { let h = m[1].toLowerCase(); if (h.length === 3) h = h.split("").map(c => c + c).join(""); add(h); }
+  for (const m of css.matchAll(/rgba?\(\s*(\d{1,3})[,\s]+(\d{1,3})[,\s]+(\d{1,3})/gi)) add([m[1], m[2], m[3]].map(v => Math.min(255, +v).toString(16).padStart(2, "0")).join(""));
+  return [...cnt].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([h, n]) => "#" + h + "(" + n + ")");
+}
+
+function topFonts(css) {
+  const cnt = new Map();
+  for (const m of css.matchAll(/font-family\s*:\s*([^;}{]+)/gi)) {
+    const f = m[1].split(",")[0].replace(/["']/g, "").trim();
+    if (f && !/^(inherit|initial|unset|var\()/i.test(f)) cnt.set(f, (cnt.get(f) || 0) + 1);
+  }
+  for (const m of css.matchAll(/family=([^&:"')]+)/g)) { const f = decodeURIComponent(m[1]).replace(/\+/g, " "); cnt.set(f, (cnt.get(f) || 0) + 3); }
+  return [...cnt].sort((a, b) => b[1] - a[1]).slice(0, 6).map(x => x[0]);
+}
+
+async function siteDigest(u) {
+  if (blockedHost(u)) return { url: u, error: "blocked" };
+  try {
+    const { text: html, url: final } = await getText(u, 8000, 600000);
+    const title = decodeEnt((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "").trim().slice(0, 120);
+    const desc = (metaContent(html, "description") || metaContent(html, "og:description")).slice(0, 200);
+    const themeColor = metaContent(html, "theme-color").slice(0, 20);
+    let css = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(m => m[1]).join("\n") + "\n" + [...html.matchAll(/style=["']([^"']*)["']/gi)].map(m => m[1]).join(";");
+    const links = [...html.matchAll(/<link[^>]+>/gi)].map(m => m[0]).filter(t => /stylesheet/i.test(t)).map(t => (t.match(/href=["']([^"']+)/i) || [])[1]).filter(Boolean).slice(0, 4);
+    for (const h of links) {
+      try {
+        const abs = new URL(decodeEnt(h), final).href;
+        if (/fonts\.googleapis\.com/.test(abs)) { css += "\n/* " + abs + " */"; continue; }
+        if (blockedHost(abs)) continue;
+        css += "\n" + (await getText(abs, 6000, 400000)).text;
+      } catch {}
+    }
+    const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<noscript[\s\S]*?<\/noscript>/gi, " ").replace(/<[^>]+>/g, " ");
+    return { url: final, title, desc, themeColor, colors: topColors(css), fonts: topFonts(css), text: decodeEnt(text).replace(/\s+/g, " ").trim().slice(0, 1500) };
+  } catch {
+    return { url: u, error: "fetch_failed" };
+  }
+}
 
 function callClaude(env, payload) {
   return fetch("https://api.anthropic.com/v1/messages", {
