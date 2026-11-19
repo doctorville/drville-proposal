@@ -138,6 +138,7 @@ input[type=url]:focus-visible{outline:2px solid var(--app-accent);outline-offset
 .bro .mega .b{color:var(--pod,var(--blue));display:block}
 .bro[data-wide] .mega{font-size:clamp(40px,7.6cqi,96px);line-height:1}
 .bro[data-wide] .label{font-size:clamp(46px,7.4cqi,88px);line-height:1}
+.bro[data-wide] .vs .me b{font-size:clamp(32px,4cqi,48px);font-weight:700}
 .bro .hero h2{font-size:clamp(21px,2.6cqi,30px);font-weight:700;line-height:1.4;max-width:30em;text-wrap:balance}
 .bro .hero .lead{color:var(--soft,#B9C8D8);font-size:clamp(15px,1.6cqi,18px);max-width:44em}
 .bro .meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid rgba(255,255,255,.18);margin-top:18px}
@@ -949,7 +950,7 @@ async function buildPPT(m,REC){
     s.addText(c[0],{x:x+0.2,y:y0+0.18,w:w-0.4,h:0.3,fontFace:KR,fontSize:13,bold:true,color:C.ink,margin:0});
     s.addShape(P.ShapeType.rect,{x:x+0.2,y:y0+0.55,w:0.95,h:0.34,fill:{color:C.blue},line:{type:"none"}});
     s.addText(c[1],{x:x+0.2,y:y0+0.55,w:0.95,h:0.34,fontFace:D,fontSize:15,color:C.white,align:"center",valign:"middle",margin:0});
-    s.addText(c[2],{x:x+0.2,y:y0+0.95,w:w-0.4,h:0.75,fontFace:D,fontSize:40,color:C.blue,margin:0,valign:"middle",fit:"shrink"});
+    s.addText(c[2],{x:x+0.2,y:y0+0.95,w:w-0.4,h:0.75,fontFace:D,fontSize:FONTS[T.display].wide?30:40,bold:FONTS[T.display].wide,color:C.blue,margin:0,valign:"middle",fit:"shrink"});
     s.addText(c[3],{x:x+0.2,y:y0+1.7,w:w-0.3,h:0.3,fontFace:KR,fontSize:8.5,color:C.mute,margin:0,fit:"shrink"});
     [["닥터빌",c[4],c[5].replace(/^(3,000~3,500)명$/,"$1"),true],["경쟁사",c[6],c[7],false]].forEach((r,k)=>{const y=y0+2.12+k*0.32;
       s.addText(r[0],{x:x+0.2,y,w:0.6,h:0.26,fontFace:KR,fontSize:9.5,bold:r[3],color:C.ink,margin:0,valign:"middle"});
