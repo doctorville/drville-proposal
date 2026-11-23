@@ -2,10 +2,31 @@
 // - API 키는 Worker 시크릿(ANTHROPIC_API_KEY)에만 저장되고 브라우저로 내려가지 않습니다.
 // - 허용된 사이트(ALLOWED_ORIGINS)에서 온 요청만 처리합니다.
 // - ACCESS_CODE 시크릿을 등록하면 팀 접근 코드가 있어야 사용할 수 있습니다.
+// - 업무 포털(doctorville.github.io/portal) 로그인 토큰이 있어야 사용할 수 있습니다.
+//   포털 함수(portal/me)로 토큰·계정 상태를 확인하고 2분간 캐시합니다. PORTAL_AUTH="off" 로 끌 수 있습니다.
 
 const DEFAULT_MODEL = "claude-sonnet-5-5";
 const DEFAULT_ORIGINS = ["https://doctorville.github.io"];
 const MAX_PROMPT = 40000;
+const DEFAULT_PORTAL_ME = "https://ofujfkotwuqgiqiiygpq.functions.ap-southeast-1.nhost.run/v1/portal/me";
+const PORTAL_CACHE = new Map();
+
+// 업무 포털 로그인 확인: 통과하면 {email}, 아니면 null
+async function portalUser(req, env) {
+  const h = req.headers.get("authorization") || "";
+  if (!/^Bearer [\w.-]{20,}$/.test(h)) return null;
+  const now = Date.now(), hit = PORTAL_CACHE.get(h);
+  if (hit && hit.exp > now) return hit.v;
+  let v = null;
+  try {
+    const r = await fetch(env.PORTAL_ME_URL || DEFAULT_PORTAL_ME, { method: "POST", headers: { authorization: h, "content-type": "application/json" }, body: "{}" });
+    if (r.ok) { const j = await r.json(); if (j && j.services && j.services.proposal) v = { email: j.email }; }
+    else if (r.status >= 500) throw new Error("portal " + r.status);
+  } catch (e) { return undefined; } // 포털 서버 오류: 캐시하지 않음
+  if (PORTAL_CACHE.size > 500) PORTAL_CACHE.clear();
+  PORTAL_CACHE.set(h, { v, exp: now + (v ? 120000 : 15000) });
+  return v;
+}
 
 export default {
   async fetch(req, env) {
@@ -15,7 +36,7 @@ export default {
     const cors = {
       "Access-Control-Allow-Origin": allowed ? origin : allowList[0],
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "content-type,x-access-code",
+      "Access-Control-Allow-Headers": "content-type,x-access-code,authorization",
       "Access-Control-Max-Age": "86400",
       "Vary": "Origin",
     };
@@ -26,10 +47,15 @@ export default {
     const url = new URL(req.url);
     const model = env.MODEL || DEFAULT_MODEL;
 
-    if (url.pathname === "/health") return json({ ok: true, ready: !!env.ANTHROPIC_API_KEY, access: !!env.ACCESS_CODE, model });
+    if (url.pathname === "/health") return json({ ok: true, ready: !!env.ANTHROPIC_API_KEY, access: !!env.ACCESS_CODE, portal: String(env.PORTAL_AUTH || "on") !== "off", model });
     if (!allowed) return fail("forbidden_origin", 403);
     if (req.method !== "POST") return fail("not_found", 404);
     if (env.ACCESS_CODE && req.headers.get("x-access-code") !== env.ACCESS_CODE) return fail("access_code", 401);
+    if (String(env.PORTAL_AUTH || "on") !== "off") {
+      const who = await portalUser(req, env);
+      if (who === undefined) return fail("portal_unavailable", 503);
+      if (!who) return fail("portal_login", 401);
+    }
     if (!env.ANTHROPIC_API_KEY) return fail("not_configured", 503);
 
     let body;
