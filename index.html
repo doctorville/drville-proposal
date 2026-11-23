@@ -1,5 +1,8 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">
+<!-- 업무 포털 로그인 필수 (doctorville.github.io 배포본) -->
+<script src="/portal/portal-session.js"></script>
+<script src="portal-gate.js"></script>
 <title>닥터빌 제안서 생성기</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -713,11 +716,14 @@ function err(code,msg){const e=new Error(msg||code);e.code=code;return e}
 function parseLoose(text){let t=String(text||"").replace(/<think>[\s\S]*?<\/think>/g,"").replace(/```(?:json)?/g,"");const a=t.indexOf("{"),z=t.lastIndexOf("}");
   if(a<0||z<a)throw err("parse");t=t.slice(a,z+1);
   try{return JSON.parse(t)}catch(x){try{return JSON.parse(t.replace(/,\s*([}\]])/g,"$1"))}catch(y){throw err("parse")}}}
-async function proxyFetch(path,body,signal){if(!API_BASE)throw err("no_engine");let res;
-  try{res=await fetch(API_BASE+path,{method:"POST",headers:{"content-type":"application/json",...(accessCode?{"x-access-code":accessCode}:{})},body:JSON.stringify(body),signal})}
+/* 업무 포털 로그인 토큰 (doctorville.github.io 배포본: Worker가 포털 로그인 여부를 확인) */
+async function portalAuth(){const P=window.PortalSession;if(!P||location.hostname!=="doctorville.github.io")return {};
+  try{return {authorization:"Bearer "+await P.token()}}catch(x){P.goLogin(location.pathname);throw err("portal_login")}}
+async function proxyFetch(path,body,signal){if(!API_BASE)throw err("no_engine");let res;const auth=await portalAuth();
+  try{res=await fetch(API_BASE+path,{method:"POST",headers:{"content-type":"application/json",...auth,...(accessCode?{"x-access-code":accessCode}:{})},body:JSON.stringify(body),signal})}
   catch(x){if(x&&x.name==="AbortError")throw err("cancelled");throw err("network")}
   if(!res.ok){const b=await res.json().catch(()=>null);const c=(b&&b.error&&b.error.code)||(res.status===429?"rate_limited":"api_error");
-    if(c==="access_code")showAccess(true);throw err(c)}
+    if(c==="access_code")showAccess(true);if(c==="portal_login"&&window.PortalSession)window.PortalSession.goLogin(location.pathname);throw err(c)}
   return res}
 async function proxyAnalyze(prompt,signal,onProgress){const res=await proxyFetch("/analyze",{prompt},signal);
   const rd=res.body.getReader(),dec=new TextDecoder();let buf="",text="";
@@ -729,7 +735,7 @@ async function proxyAnalyze(prompt,signal,onProgress){const res=await proxyFetch
   catch(x){if(x&&x.code)throw x;if(x&&x.name==="AbortError")throw err("cancelled");throw err("network")}
   return parseLoose(text)}
 const ERRMSG={no_engine:"이 화면에서는 AI 분석을 쓸 수 없습니다.",network:"AI 서버에 연결하지 못했습니다. 인터넷 연결을 확인하세요.",parse:"AI 응답을 읽지 못했습니다. 다시 시도하세요.",
-  rate_limited:"요청이 많아 잠시 후 다시 시도하세요.",overloaded:"AI 서버가 혼잡합니다. 잠시 후 다시 시도하세요.",access_code:"팀 접근 코드를 입력하세요.",
+  rate_limited:"요청이 많아 잠시 후 다시 시도하세요.",overloaded:"AI 서버가 혼잡합니다. 잠시 후 다시 시도하세요.",access_code:"팀 접근 코드를 입력하세요.",portal_login:"업무 포털 로그인이 필요합니다.",portal_unavailable:"업무 포털 확인 서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.",
   not_configured:"AI 서버에 API 키가 아직 등록되지 않았습니다. 관리자에게 문의하세요.",forbidden_origin:"허용되지 않은 주소에서 접속했습니다.",not_granted:"Claude 사용이 허용되지 않았습니다.",cancelled:"작업을 멈췄습니다.",
   api_error:"AI 서버가 오류를 반환했습니다. 잠시 후 다시 시도하세요.",bad_request:"요청 내용이 너무 길거나 형식이 맞지 않습니다.",
   no_search:"웹 검색(Exa 커넥터)을 쓸 수 없어 기관 정보를 찾지 못했습니다. claude.ai 설정 → 커넥터에서 Exa를 연결하세요."};
