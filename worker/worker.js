@@ -1,7 +1,7 @@
 // 닥터빌 제안서 생성기 AI 프록시 (Cloudflare Worker)
 // - API 키는 Worker 시크릿(ANTHROPIC_API_KEY)에만 저장되고 브라우저로 내려가지 않습니다.
 // - 허용된 사이트(ALLOWED_ORIGINS)에서 온 요청만 처리합니다.
-// - ACCESS_CODE 시크릿을 등록하면 팀 접근 코드가 있어야 사용할 수 있습니다.
+// - ACCESS_CODE 시크릿: 포털 확인을 끈 경우(PORTAL_AUTH="off")에만 팀 접근 코드로 사용합니다.
 // - 업무 포털(doctorville.github.io/portal) 로그인 토큰이 있어야 사용할 수 있습니다.
 //   포털 함수(portal/me)로 토큰·계정 상태를 확인하고 2분간 캐시합니다. PORTAL_AUTH="off" 로 끌 수 있습니다.
 
@@ -50,12 +50,12 @@ export default {
     if (url.pathname === "/health") return json({ ok: true, ready: !!env.ANTHROPIC_API_KEY, access: !!env.ACCESS_CODE, portal: String(env.PORTAL_AUTH || "on") !== "off", model });
     if (!allowed) return fail("forbidden_origin", 403);
     if (req.method !== "POST") return fail("not_found", 404);
-    if (env.ACCESS_CODE && req.headers.get("x-access-code") !== env.ACCESS_CODE) return fail("access_code", 401);
+    // 업무 포털 로그인으로 사용 권한 확인 (포털 확인을 끈 경우에만 기존 팀 접근 코드 사용)
     if (String(env.PORTAL_AUTH || "on") !== "off") {
       const who = await portalUser(req, env);
       if (who === undefined) return fail("portal_unavailable", 503);
       if (!who) return fail("portal_login", 401);
-    }
+    } else if (env.ACCESS_CODE && req.headers.get("x-access-code") !== env.ACCESS_CODE) return fail("access_code", 401);
     if (!env.ANTHROPIC_API_KEY) return fail("not_configured", 503);
 
     let body;
