@@ -73,6 +73,24 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .logo-up{display:flex;align-items:center;gap:8px;font-size:12px;line-height:18px;color:var(--app-mute);flex-wrap:wrap}
 .logo-up button{font:inherit;font-size:12px;line-height:18px;height:28px;background:none;border:1px solid var(--app-line);color:var(--app-fg);border-radius:6px;padding:0 10px;cursor:pointer}
 [hidden]{display:none!important}
+.hist{border:1px solid var(--app-line);border-radius:8px;padding:8px 12px;background:var(--app-field)}
+.hist summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--app-fg)}
+.hist summary span{display:inline-block;min-width:20px;text-align:center;font-size:11px;background:var(--app-accent);color:var(--app-accent-ink);border-radius:999px;padding:0 6px;margin-left:4px}
+.hist .hint{margin:8px 0;font-size:12px;color:var(--app-mute)}
+.hist ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;max-height:240px;overflow:auto}
+.hist li{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}
+.hist li.cur .hl{border-color:var(--app-accent)}
+.hist .hl{font:inherit;font-size:13px;text-align:left;background:var(--app-panel);border:1px solid var(--app-line);border-radius:6px;padding:6px 8px;cursor:pointer;color:var(--app-fg);min-width:0}
+.hist .hl small{display:block;color:var(--app-mute);font-size:11px}
+.hist .hd,.hist .hrow button,.pbtn{font:inherit;font-size:12px;background:none;border:1px solid var(--app-line);color:var(--app-fg);border-radius:6px;padding:4px 8px;cursor:pointer;white-space:nowrap}
+.hist .hd.arm{border-color:#E5484D;color:#E5484D}
+.hist .hrow{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.pbtn:disabled{opacity:.45;cursor:default}
+.pbtn.on{background:var(--app-accent);color:var(--app-accent-ink);border-color:var(--app-accent)}
+.pv-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#preview.editing [data-ed]{outline:1px dashed #0085FF;outline-offset:2px;cursor:text;border-radius:2px}
+#preview.editing [data-ed]:focus{outline:2px solid #0085FF;background:rgba(0,133,255,.06)}
+.edit-tip{font-size:12px;color:var(--app-warn-fg);background:var(--app-warn-bg);border-radius:6px;padding:6px 10px}
 .org{border:1px solid var(--app-line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--app-field);min-width:0}
 .org-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}
 .org-h button,.org .add{font:inherit;font-size:12px;background:none;border:1px solid var(--app-line);color:var(--app-accent);border-radius:6px;padding:3px 8px;cursor:pointer;white-space:nowrap}
@@ -261,7 +279,30 @@ input[type=url]:focus-visible{outline:2px solid var(--app-accent);outline-offset
 .bro .sub-stats{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:18px;font-size:14px;color:var(--mute)}
 .bro .sub-stats b{color:var(--ink)}
 @container (max-width:420px){.bro .vs{grid-template-columns:minmax(0,1fr)}}
+.bro .cards3.cards2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bro p,.bro li,.bro td,.bro h2,.bro h3,.bro h4{text-wrap:pretty}
+.bro .toc{padding-block:clamp(48px,7cqi,88px)}
+.bro .tocl{list-style:none;margin:36px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:2px;background:var(--line);border:1px solid var(--line);border-radius:var(--r,0);overflow:hidden}
+.bro .tocl a{display:flex;flex-direction:column;gap:6px;height:100%;background:var(--paper,#fff);padding:22px;color:var(--ink);text-decoration:none}
+.bro .tocl a:hover strong{color:var(--blue)}
+.bro .tocl b{font-family:var(--fd);font-weight:400;font-size:40px;line-height:1;color:var(--blue)}
+.bro .tocl strong{font-size:18px}
+.bro .tocl span{font-size:13px;color:var(--mute)}
+.bro .rec{background:var(--ice)}
+.bro .recg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:36px}
+.bro .recg.n1{grid-template-columns:minmax(0,1fr)}
+.bro .recg.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bro .recg .fit{align-self:stretch}
+.bro .fit h5{margin:0;font-size:15px;color:var(--soft,#B9C8D8);font-weight:700}
+.bro .fit .more{margin-top:auto;font-size:13px;font-weight:700;color:var(--acc2,#6FB8FF);text-decoration:none}
+.bro .kp{background:var(--ice);border-radius:var(--r,0);padding:28px;display:flex;flex-direction:column;gap:8px;align-self:start}
+.bro .kp .k{font-family:var(--fd);font-size:18px;letter-spacing:.06em;color:var(--blue)}
+.bro .kp h4{margin:0;font-size:18px}
+.bro .kp ul{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.bro .kp li{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.bro .kp li span{color:var(--mute)}
 @container (max-width:760px){
+  .bro .recg,.bro .recg.n2,.bro .cards3.cards2{grid-template-columns:minmax(0,1fr)}
   .bro .vs{grid-template-columns:repeat(2,minmax(0,1fr))}
   .bro .cards3,.bro .pgrid2{grid-template-columns:minmax(0,1fr)}
   .bro .flow.flow5{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -282,6 +323,11 @@ input[type=url]:focus-visible{outline:2px solid var(--app-accent);outline-offset
 
 <div class="shell">
   <form class="panel" id="form" novalidate>
+    <details class="hist" id="histBox"><summary>저장된 제안서 <span id="histCount">0</span></summary>
+      <p class="hint">웹브로셔를 만들거나 문구를 고치면 이 브라우저에 자동 저장됩니다(최근 30개). 다른 PC로 옮기거나 공유하려면 파일로 내보내세요.</p>
+      <ul id="histList"></ul>
+      <div class="hrow"><button type="button" id="histExport">파일로 내보내기</button><button type="button" id="histImport">파일 불러오기</button><input type="file" id="histFile" accept="application/json,.json" hidden></div>
+    </details>
     <fieldset>
       <legend>제안담당자</legend>
       <div class="row2">
@@ -366,7 +412,8 @@ input[type=url]:focus-visible{outline:2px solid var(--app-accent);outline-offset
   </form>
 
   <div class="preview-wrap">
-    <div class="preview-head"><span id="pvLabel">웹브로셔 미리보기</span><span class="badge" id="sampleBadge">예시 입력값</span></div>
+    <div class="preview-head"><span id="pvLabel">웹브로셔 미리보기</span><span class="pv-actions"><span class="badge" id="sampleBadge">예시 입력값</span><button type="button" class="pbtn" id="editBtn" disabled>문구 편집</button></span></div>
+    <p class="edit-tip" id="editTip" hidden>점선으로 표시된 문구를 눌러 바로 고칠 수 있습니다. 고친 내용은 HTML·PPT·PDF에 그대로 반영되고 자동 저장됩니다. 편집을 마치면 '편집 완료'를 누르세요.</p>
     <div class="frame"><div id="preview"></div></div>
   </div>
 </div>
@@ -384,7 +431,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 /* ---------- 원소스 (ojungin.github.io/drville + 닥터빌_광고제안서.pdf) ---------- */
 const SOURCE={
   stats:[["65,000+","누적 가입자 수"],["18,000+","월 활성 사용자 (MAU)"],["8,000+","일 활성 사용자 (DAU)"],["36+","제휴 파트너사"]],
-  pillars:[["SERVICE 1","CME 학술서비스","라이브세미나/웹심포지엄 · 아카데미 · 학회 콘텐츠 · 최신의학논문 · 브랜드존"],["SERVICE 2","닥터스 파트너스","개원플래너 · 세무·노무·법무 컨설팅 · 장비/인테리어 · 보험심사청구 지원"],["SERVICE 3","커뮤니티 서비스","진단/처방 Q&A · 증례일기 · 취미/일상/재테크 · 월 2,700건 게시글"]],
+  pillars:[["SERVICE 1","CME 학술서비스","라이브세미나/웹심포지엄 · 아카데미 · 학회 콘텐츠 · 최신의학논문 · 브랜드존"],["SERVICE 2","닥터스 파트너스","개원플래너 · 세무·노무·법무 컨설팅 · 장비/인테리어 · 보험심사청구 지원"],["SERVICE 3","비학술 세미나","주 1회 운영하는 비학술 세미나 콘텐츠 · 회당 평균 3,000명 수준 참여"]],
   demo:[["주요 연령대",[["40대",37],["30대",28],["50대",24]]],["진료과 TOP 3",[["내과",36],["가정의학과",13],["피부/성형",13]]],["주요 근무지역",[["서울",30],["경기",28],["경상",22]]]],
   partners:["VIATRIS","Abbott","Lilly","abbvie","Pfizer","Biogen","GSK","BAYER","AstraZeneca","novo nordisk","SK케미칼","대웅제약","현대약품","대한심장학회","삼성서울병원"],
   partnerLine:"총 36개의 제약사·학회·병원과 함께 연간 800회 이상 세미나 운영",
@@ -394,7 +441,7 @@ const SOURCE={
     ["세미나 평균 참석","2배+","3,000+","회당 평균 3,000~3,500명 · 최대 6,000명",3500,"3,000~3,500명",1500,"1,500명","같은 세미나도 2배 이상 많은 의사가 듣습니다."],
     ["연간 세미나 운영","2배","800+","연간 라이브세미나 운영 횟수",800,"800회 이상",400,"400회 내외","운영 경험이 많아 기획부터 결과 보고까지 안정적입니다."]],
   compareNote:"* 닥터빌 2026년 기준 내부 집계. 경쟁 플랫폼 수치는 업계 추정치입니다.",
-  subStats:[["일 활성 사용자","8,000+"],["제휴 파트너사","36+"],["커뮤니티 게시글","월 2,700건"]],
+  subStats:[["일 활성 사용자","8,000+"],["제휴 파트너사","36+"],["비학술 세미나","주 1회 · 회당 평균 3,000명"]],
   process:[["상담 · 요구사항 확인","목표, 타겟 진료과, 일정과 예산 범위를 함께 확인합니다."],["맞춤 기획안 · 견적","서비스 조합, 노출 일정, 운영 범위를 담은 실행안을 드립니다."],["실행 · 운영","광고 노출, 세미나 송출, 행사 현장을 전담 인력이 운영합니다."],["결과 리포트","노출·참석·설문 데이터를 정리해 성과를 보고합니다."]]
 };
 const SERVICES={
@@ -402,7 +449,7 @@ const SERVICES={
     why:[["6.5만 의사 회원 정밀 타겟팅","진료과, 지역, 근무 형태 등 세분화된 데이터로 핵심 타겟에게 정확하게 도달합니다."],["회원 주요 동선 노출","로그인 팝업, 메인 배너 A~G, 세미나·브랜드존·출석체크 서브 배너로 노출합니다. 26년 1분기 배너 영역 총 조회수는 738,749회입니다."],["다각화된 마케팅 채널","브랜드존 e-Detailing(UV 약 4,000명·PV 약 12만 회), 아카데미, 서베이, EDM/SMS(도달률 10~13%)까지 통합 운영합니다."]],
     items:[["메인 배너 A~G","전체 방문 회원 · 월(4주) 단위"],["팝업","로그인 회원 전체 · 1일 단위"],["서브 배너","세미나 상세/목록 · 브랜드존 · 출석체크 A~D"],["브랜드존","e브로셔 · 제품문의 · 동영상 · QUIZ"],["아카데미","질환별 13개 주제 시리즈 콘텐츠"],["서베이 & EDM/SMS","진료과·지역·근무형태 타겟"]]},
   webinar:{en:"LIVE SEMINAR",name:"웹 세미나",sub:"평균 3,000~3,500명이 참석하고 최대 6,000명이 동시 입장하는 라이브세미나 서비스입니다.",
-    why:[["검증된 참석 규모","점심(12:30~13:00) 약 3,000명, 저녁(18:00~19:00) 약 3,500명이 참석하며 최대 6,000명까지 동시 입장합니다."],["연간 800회 이상 운영","제약사·학회·병원경영·취미 등 분야별 라이브세미나를 연간 800회 이상 운영합니다."],["실시간 소통 · 결과 리포트","실시간 Q&A와 설문을 운영하고, 행사 후 7일 이내 결과 리포트를 전달합니다."]],
+    why:[["검증된 참석 규모","회당 평균 3,000~3,500명이 참석하고 최대 6,000명까지 동시 입장합니다. 참석 규모는 예산과 모객 상한에 맞춰 설정합니다."],["연간 800회 이상 운영","제약사·학회·병원경영·취미 등 분야별 라이브세미나를 연간 800회 이상 운영합니다."],["실시간 소통 · 결과 리포트","실시간 Q&A와 설문을 운영하고, 행사 후 7일 이내 결과 리포트를 전달합니다."]],
     items:[["1인 웨비나","닥터빌 촬영·송출 · 1인 강의"],["웹심포지엄","좌장·연자 2~5인 · 강의·토론"],["Streaming ONLY","자체 촬영 · 닥터빌 동시송출"],["시리즈 운영","WEEK · 회원 참여형 · 학회 연계"]]},
   conference:{en:"CONFERENCE",name:"온/오프라인 컨퍼런스",sub:"의학 행사의 새로운 표준, 컨퍼런스빌. 엠서클 전 조직이 함께 행사를 운영합니다.",
     why:[["전사 통합 인프라","닥터빌·하이닥·컨퍼런스빌이 기획, 홍보, 미디어, 현장 운영, 디자인을 하나의 체계로 제공합니다."],["강력한 타겟 홍보","6.5만 회원 대상 배너/EDM과 하이닥 보도자료, 외부 매체 송출로 참석자를 모객합니다."],["검증된 경험","6년간 400건 이상의 행사와 10건 이상의 대규모 국제학술대회를 운영했습니다."]],
@@ -413,7 +460,7 @@ const ORDER=["platform","webinar","conference"];
 const ADS={lead:"6.5만 명 이상의 의사 회원에게 직접 도달합니다.",
   rows:[["메인페이지 배너 (A~G)","전체 방문 회원","가장 넓은 노출, 위치별 단가"],["팝업 광고","로그인 회원 전체","최고 가시성, 1일 단위 운영"],["라이브세미나 / 웨비나","진료과별 타겟","1,000~6,000명 참석자 보장"],["브랜드존 e-Detailing","UV 약 4,000명 / PV 약 12만 회","제품 Key Message 전달"],["서베이 (Survey)","진료과 / 지역 / 근무형태 타겟","신제품 조사 / 제품 홍보"],["EDM / SMS 홍보","타겟 세그먼트","도달률 10~13%"],["닥터빌 아카데미","질환별 관심 회원","연속 시리즈 학술 콘텐츠 (13개 주제)"]],
   note:"배너: 26년 1분기 활성사용자 8,818명 / 총 조회수 738,749회 · 브랜드존·EDM 수치: 25년 12월 기준"};
-const SEMINAR={slots:"점심 12:30~13:00 약 3,000명 · 저녁 18:00~19:00 약 3,500명 · 최대 6,000명 동시 입장",
+const SEMINAR={slots:"회당 평균 3,000~3,500명 · 최대 6,000명 동시 입장 · 참석 규모는 예산과 모객 상한에 맞춰 설정",
   formats:[["WEBINAR","라이브세미나","닥터빌 촬영·송출 / 연자 1인 강의 형식","6,000,000"],["WEB SYMPOSIUM","웹심포지엄","닥터빌 촬영·송출 / 좌장·연자 2~5인 강의·토론","7,500,000"],["STREAMING ONLY","송출 전용","재송출 또는 외부 영상 닥터빌 동시송출","5,000,000"]],
   series:[["WEEK","WEEK 웹심포지엄","일주일간 특정 제품 관련 강의를 집중 운영","주 5~7회"],["MEMBER","회원 참여형","닥터빌 회원 대상 증례 접수 후 선별해 강의 구성","월 1회"],["SOCIETY","학회와 함께하는","학회와 제약사가 함께 특정 제품 관련 강의 구성","연 6회"]],
   steps:[["기획·편성","2~3개월 전","주제·일정 확정"],["아젠다 수립","1개월 전","연자 섭외·확정"],["행사 준비","1개월 전","디자인·페이지 제작"],["행사 운영","행사 당일","촬영·송출·Q&A"],["결과 보고","7일 이내","리포트 전달"]]};
@@ -467,8 +514,9 @@ const j=(w,a,b)=>w+(hasBatchim(w)?a:b);
 function fmtDate(v){if(!v)return"";const[y,m,d]=v.split("-");return `${y}.${m}.${d}`}
 function today(){const d=new Date(),p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
 const ICON_SVG=`<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="dvg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00C2FF"/><stop offset="1" stop-color="#14E0A8"/></linearGradient></defs><path d="M24 2a22 22 0 1 1-15.6 37.6L3 45l2.6-7.4A22 22 0 0 1 24 2z" fill="url(#dvg)"/><circle cx="24" cy="24" r="12.5" fill="#fff"/><path d="M21.6 17h4.8v4.6H31v4.8h-4.6V31h-4.8v-4.6H17v-4.8h4.6z" fill="#13C9B5"/></svg>`;
+const LOGO_PNG="data:image/png;base64,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"; // 닥터빌 공식 로고(컬러)
 let customLogo=null; // {url,w,h}
-function logoHTML(){return customLogo?`<span class="logo"><img src="${customLogo.url}" alt="닥터빌"></span>`:`<span class="logo">${ICON_SVG}<span>Dr.Ville</span></span>`}
+function logoHTML(){return `<span class="logo"><img src="${customLogo?customLogo.url:LOGO_PNG}" alt="Dr.Ville"></span>`}
 $("appLogo").innerHTML=`<span class="bro" style="background:none;container-type:normal">${logoHTML()}</span>`;
 
 /* ---------- form state ---------- */
@@ -499,23 +547,28 @@ function baseModel(d){
 }
 
 /* ---------- brochure render ---------- */
-function insightHTML(m){const a=m.analysis;if(!a)return"";const li=x=>x.length?`<ul>${x.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>`:`<p>제안 협의 시 함께 설정합니다.</p>`;
+function insightHTML(m){const a=m.analysis;if(!a)return"";
+  const li=(x,p)=>`<ul>${x.map((v,i)=>`<li data-ed="${p}.${i}">${esc(v)}</li>`).join("")}</ul>`;
+  const g=[["OBJECTIVE","목표",a.objectives,"analysis.objectives"],["TARGET","타겟",a.targets,"analysis.targets"]].concat(a.kpis&&a.kpis.length?[["KPI","목표 지표",a.kpis,"analysis.kpis"]]:[]);
   return `<section class="need" id="bro-need"><div class="in"><h2 class="label">insight</h2><p class="label-sub">요구사항 분석 및 대응 방안</p>
-    ${a.summary?`<p class="label-desc">${esc(a.summary)}</p>`:""}
-    <div class="cards3"><div><span class="k">OBJECTIVE</span><h4>목표</h4>${li(a.objectives)}</div><div><span class="k">TARGET</span><h4>타겟</h4>${li(a.targets)}</div><div><span class="k">KPI</span><h4>목표 지표</h4>${li(a.kpis)}</div></div>
-    ${m.reqMap&&m.reqMap.length?tbl(["요구사항","닥터빌 대응 방안","활용 상품"],m.reqMap.map(x=>[x.need,x.solution,x.product]),-1):""}
-    ${m.recReason?`<p class="fine">추천 서비스 근거: ${esc(m.recReason)}</p>`:""}</div></section>`}
+    ${a.summary?`<p class="label-desc" data-ed="analysis.summary">${esc(a.summary)}</p>`:""}
+    <div class="cards3${g.length===2?" cards2":""}">${g.map(x=>`<div><span class="k">${x[0]}</span><h4>${x[1]}</h4>${li(x[2],x[3])}</div>`).join("")}</div>
+    ${m.reqMap&&m.reqMap.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>요구사항</th><th>닥터빌 대응 방안</th><th>활용 상품</th></tr></thead><tbody>${m.reqMap.map((x,i)=>`<tr><td data-ed="reqMap.${i}.need">${esc(x.need)}</td><td data-ed="reqMap.${i}.solution">${esc(x.solution)}</td><td data-ed="reqMap.${i}.product">${esc(x.product)}</td></tr>`).join("")}</tbody></table></div>`:""}
+  </div></section>`}
 function priceRows(d){return d.svc.filter(k=>PRICE[k]).map(k=>[k,PRICE[k]])}
 function tbl(head,rows,numCol){return `<div class="tblwrap"><table class="tbl"><thead><tr>${head.map((h,i)=>`<th${i===numCol?' class="num"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((x,i)=>`<td${i===numCol?' class="num"':""}>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`}
-function detailHTML(d){let h="";
-  if(d.svc.includes("platform"))h+=`<h3 class="sub2">광고 상품 안내<small>${ADS.lead}</small></h3>${tbl(["광고 상품","도달 타겟","특징"],ADS.rows,-1)}<p class="fine">${ADS.note}</p>`;
-  if(d.svc.includes("webinar"))h+=`<h3 class="sub2">라이브세미나 운영 유형<small>연속성을 지닌 시리즈 웹심포지엄과 표준 운영 프로세스</small></h3>
+function adsHTML(){return `<h3 class="sub2" id="bro-ads">광고 상품 안내<small>${ADS.lead}</small></h3>${tbl(["광고 상품","도달 타겟","특징"],ADS.rows,-1)}<p class="fine">${ADS.note}</p>`}
+function liveHTML(d){return `<h3 class="sub2">라이브세미나 운영 유형<small>연속성을 지닌 시리즈 웹심포지엄과 표준 운영 프로세스</small></h3>
     <p class="slots">${SEMINAR.slots}</p>
     <div class="cards3">${SEMINAR.formats.map(f=>`<div><span class="k">${f[0]}</span><h4>${f[1]}</h4><p>${f[2]}</p>${d.price?`<span class="em">기본 구성 ${f[3]}원~</span>`:""}</div>`).join("")}</div>
     ${d.price?`<p class="fine">* ${PRICE.year}년 단가 · VAT 별도 · ${PRICE.webinarNote}</p>`:""}
     <div class="cards3">${SEMINAR.series.map(f=>`<div><span class="k">${f[0]}</span><h4>${f[1]}</h4><p>${f[2]}</p><span class="em">${f[3]}</span></div>`).join("")}</div>
-    <div class="flow flow5">${SEMINAR.steps.map((p,i)=>`<div><b>${i+1}</b><h4>${p[0]}</h4><span class="when">${p[1]}</span><p>${p[2]}</p></div>`).join("")}</div>`;
-  return h}
+    <div class="flow flow5">${SEMINAR.steps.map((p,i)=>`<div><b>${i+1}</b><h4>${p[0]}</h4><span class="when">${p[1]}</span><p>${p[2]}</p></div>`).join("")}</div>`}
+function tocList(m){const d=m.input,L=[["01","회사 소개","Why Dr.Ville · 회원 구성 · 파트너","bro-about"],
+    ["02","맞춤 제안",["제안 배경",m.analysis?"요구사항 분석":null,"추천 서비스"].filter(Boolean).join(" · "),"bro-why"],
+    ["03","서비스 안내",["광고 상품"].concat(d.svc.map(k=>SERVICES[k].name)).join(" · "),"bro-svc"]];
+  if(d.price&&priceRows(d).length)L.push(["04","가격 안내",`${PRICE.year}년 서비스 단가`,"bro-price"]);
+  L.push([String(L.length+1).padStart(2,"0"),"진행 절차","상담부터 결과 리포트까지","bro-flow"]);return L}
 function priceHTML(d){const g=priceRows(d);const lab={platform:"플랫폼 광고",webinar:"라이브세미나"};
   return `<section id="bro-price"><div class="in"><h2 class="label">price</h2><p class="label-sub">${PRICE.year}년 서비스 단가</p>
     ${g.length?`<div>${g.map(([k,rows])=>`<div><h3 class="sub2" style="margin-top:32px;padding-top:0;border:0">${lab[k]}</h3>${tbl(["분류","상품명","기준","단가 (원)"],rows,3)}${k==="webinar"?`<p class="fine">${PRICE.webinarNote}</p>`:""}</div>`).join("")}</div>`:""}
@@ -523,29 +576,27 @@ function priceHTML(d){const g=priceRows(d);const lab={platform:"플랫폼 광고
     <p class="fine">${PRICE.note}</p></div></section>`}
 function brochureHTML(m){
   const d=m.input,c=esc(d.client.name),mg=d.manager;
-  const svcHTML=d.svc.map((k,i)=>{const s=SERVICES[k],f=m.services[k];return `
-    <div class="svc">
+  const svcHTML=d.svc.map((k,i)=>{const s=SERVICES[k];return `
+    <div class="svc" id="bro-svc-${k}">
       <div><div class="no">SERVICE ${String(i+1).padStart(2,"0")} · ${s.en}</div><h3>${esc(s.name)}</h3><p class="sub">${esc(s.sub)}</p>
-        <div class="why">${s.why.map(w=>`<div><span><strong>${esc(w[0])}</strong><p>${esc(w[1])}</p></span></div>`).join("")}</div>
-        <div class="items">${s.items.map(it=>`<span><b>${esc(it[0])}</b>${esc(it[1])}</span>`).join("")}</div></div>
-      <aside class="fit"><span class="k">FOR ${c}</span><h4>${esc(f.headline)}</h4><ul>${f.fit.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></aside>
-    </div>`}).join("");
+        <div class="why">${s.why.map(w=>`<div><span><strong>${esc(w[0])}</strong><p>${esc(w[1])}</p></span></div>`).join("")}</div></div>
+      <aside class="kp"><span class="k">KEY PRODUCTS</span><h4>주요 상품</h4><ul>${s.items.map(it=>`<li><b>${esc(it[0])}</b><span>${esc(it[1])}</span></li>`).join("")}</ul></aside>
+    </div>${k==="webinar"?liveHTML(d):""}`}).join("");
+  const recHTML=`<section class="rec" id="bro-rec"><div class="in"><h2 class="label">recommendation</h2><p class="label-sub">${c} 추천 서비스</p>
+    ${m.recReason?`<p class="label-desc" data-ed="recReason">${esc(m.recReason)}</p>`:""}
+    <div class="recg n${Math.min(3,d.svc.length)}">${d.svc.map((k,i)=>{const s=SERVICES[k],f=m.services[k];return `<article class="fit"><span class="k">SERVICE ${String(i+1).padStart(2,"0")} · ${s.en}</span><h5>${esc(s.name)}</h5>
+      <h4 data-ed="services.${k}.headline">${esc(f.headline)}</h4><ul>${f.fit.map((x,n)=>`<li data-ed="services.${k}.fit.${n}">${esc(x)}</li>`).join("")}</ul><a class="more" href="#bro-svc-${k}">서비스 상세 보기 →</a></article>`}).join("")}</div></div></section>`;
   return `<div class="bro"${FONTS[theme.display].wide?" data-wide":""} style="${esc(themeStyle(theme))}">
-  <nav class="nav"><div class="in">${logoHTML()}<ul><li><a href="#bro-why">Proposal</a></li>${m.analysis?`<li><a href="#bro-need">Insight</a></li>`:""}<li><a href="#bro-about">Why</a></li><li><a href="#bro-svc">Services</a></li><li><a href="#bro-flow">Process</a></li><li><a href="#bro-contact">Contact</a></li></ul></div></nav>
+  <nav class="nav"><div class="in">${logoHTML()}<ul><li><a href="#bro-about">About</a></li><li><a href="#bro-why">Proposal</a></li><li><a href="#bro-svc">Services</a></li>${d.price?`<li><a href="#bro-price">Price</a></li>`:""}<li><a href="#bro-flow">Process</a></li><li><a href="#bro-contact">Contact</a></li></ul></div></nav>
   <header class="hero"><div class="in">
     <span class="chip">${esc(d.client.type)} 맞춤 제안 · ${fmtDate(d.date)}</span>
     <h1 class="mega">${esc(theme.mega[0])}<span class="b">${esc(theme.mega[1])}</span></h1>
-    <h2>${esc(m.heroTitle)}</h2><p class="lead">${esc(m.heroLead)}</p>
+    <h2 data-ed="heroTitle">${esc(m.heroTitle)}</h2><p class="lead" data-ed="heroLead">${esc(m.heroLead)}</p>
     <dl class="meta"><div><dt>Client</dt><dd>${c}${d.client.dept?` <span style="font-weight:400;color:var(--soft,#B9C8D8)">· ${esc(d.client.dept)}</span>`:""}</dd></div>
       <div><dt>Proposed by</dt><dd>${esc(mg.name)} ${esc(mg.title)}</dd></div><div><dt>Date</dt><dd>${fmtDate(d.date)}</dd></div></dl>
   </div></header>
-  <section id="bro-why"><div class="in">
-    <h2 class="label">proposal</h2><p class="label-sub">제안 배경</p>
-    <div class="two"><div><h3>${esc(m.introHeadline)}</h3><p class="body">${esc(m.introBody)}</p></div>
-      <div class="req"><h4>Key points for ${c}</h4><ol>${m.introBullets.map(b=>`<li><span>${esc(b)}</span></li>`).join("")}</ol>
-        ${d.target||d.svc.length?`<div class="tags">${d.target?d.target.split(/[,，]/).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join(""):""}${d.svc.map(k=>`<span class="tag">${esc(SERVICES[k].name)}</span>`).join("")}</div>`:""}</div></div>
-  </div></section>
-  ${insightHTML(m)}
+  <section class="toc" id="bro-toc"><div class="in"><h2 class="label">contents</h2><p class="label-sub">목차</p>
+    <ol class="tocl">${tocList(m).map(r=>`<li><a href="#${r[3]}"><b>${r[0]}</b><strong>${r[1]}</strong><span>${esc(r[2])}</span></a></li>`).join("")}</ol></div></section>
   <section class="about" id="bro-about"><div class="in">
     <h2 class="label">why dr.ville</h2><p class="label-sub">숫자로 비교하는 닥터빌의 도달력</p>
     <p class="label-desc">닥터빌은 회원 수, 활성 사용자, 세미나 참석 규모, 운영 경험 모두에서 경쟁 플랫폼을 앞섭니다. 더 많은 의사에게, 더 자주, 더 확실하게 닿습니다.</p>
@@ -558,13 +609,21 @@ function brochureHTML(m){
     <div class="demo">${SOURCE.demo.map(g=>`<div><h4>${g[0]}</h4>${g[1].map(r=>`<div class="bar"><span>${r[0]}</span><i style="--w:${Math.round(r[1]/40*100)}%"></i><em>${r[1]}%</em></div>`).join("")}</div>`).join("")}</div>
     <div class="cards3">${SOURCE.pillars.map(p=>`<div><span class="k">${p[0]}</span><h4>${p[1]}</h4><p>${p[2]}</p></div>`).join("")}</div>
   </div></section>
-  <section id="bro-svc"><div class="in"><h2 class="label">our services</h2><p class="label-sub">${c} 제안 서비스</p>${svcHTML}${detailHTML(d)}</div></section>
-  <div class="band"><div class="in"><p>${esc(m.statement)}</p><small>의료 전문가에게 필요한 모든 콘텐츠가 모이는 곳, 닥터빌</small></div></div>
-  <section id="bro-flow"><div class="in"><h2 class="label">how to work</h2><p class="label-sub">진행 프로세스</p>
-    <div class="flow">${SOURCE.process.map((p,i)=>`<div><b>${String(i+1).padStart(2,"0")}</b><h4>${p[0]}</h4><p>${esc(m.process[i]||p[1])}</p></div>`).join("")}</div></div></section>
-  ${d.price?priceHTML(d):""}
   <section class="partners"><div class="in"><h2 class="label">our partners</h2><p class="label-sub">${SOURCE.partnerLine}</p>
     <div class="pgrid">${SOURCE.partners.map(p=>`<span>${p}</span>`).join("")}</div></div></section>
+  <section id="bro-why"><div class="in">
+    <h2 class="label">proposal</h2><p class="label-sub">제안 배경</p>
+    <div class="two"><div><h3 data-ed="introHeadline">${esc(m.introHeadline)}</h3><p class="body" data-ed="introBody">${esc(m.introBody)}</p></div>
+      <div class="req"><h4>Key points for ${c}</h4><ol>${m.introBullets.map((b,i)=>`<li><span data-ed="introBullets.${i}">${esc(b)}</span></li>`).join("")}</ol>
+        ${d.target||d.svc.length?`<div class="tags">${d.target?d.target.split(/[,，]/).map(t=>`<span class="tag">${esc(t.trim())}</span>`).join(""):""}${d.svc.map(k=>`<span class="tag">${esc(SERVICES[k].name)}</span>`).join("")}</div>`:""}</div></div>
+  </div></section>
+  ${insightHTML(m)}
+  ${recHTML}
+  <div class="band"><div class="in"><p data-ed="statement">${esc(m.statement)}</p><small>의료 전문가에게 필요한 모든 콘텐츠가 모이는 곳, 닥터빌</small></div></div>
+  <section id="bro-svc"><div class="in"><h2 class="label">our services</h2><p class="label-sub">서비스 안내</p>${adsHTML()}${svcHTML}</div></section>
+  ${d.price?priceHTML(d):""}
+  <section id="bro-flow"><div class="in"><h2 class="label">how to work</h2><p class="label-sub">진행 프로세스</p>
+    <div class="flow">${SOURCE.process.map((p,i)=>`<div><b>${String(i+1).padStart(2,"0")}</b><h4>${p[0]}</h4><p data-ed="process.${i}">${esc(m.process[i]||p[1])}</p></div>`).join("")}</div></div></section>
   <section class="contact" id="bro-contact"><div class="in"><h2 class="label">contact</h2><p class="label-sub">다음 단계를 함께 논의하겠습니다</p>
     <div class="cgrid">
       <div class="card"><span class="k">Proposed by</span><span class="n">${esc(mg.name)} ${esc(mg.title)}</span><span class="o">${esc(mg.org)}</span>
@@ -602,7 +661,7 @@ ${orgText(d.org)}
 ${ORDER.map(svcFacts).join("\n")}
 [광고 상품] ${ADS.rows.map(r=>r[0]+"("+r[1]+", "+r[2]+")").join(" / ")}
 [라이브세미나] ${SEMINAR.slots} / 유형: ${SEMINAR.formats.map(f=>f[1]+"("+f[2]+")").join(", ")} / 시리즈: ${SEMINAR.series.map(f=>f[1]+" "+f[3]).join(", ")}
-[닥터빌 공통 사실] 누적 가입자 65,000명 이상, MAU 18,000 이상, DAU 8,000 이상, 제휴 파트너사 36곳 이상, 커뮤니티 월 2,700건 게시글, 연간 800회 이상 세미나 운영, 세미나 회당 평균 참석 3,000~3,500명(최대 6,000명), 경쟁 플랫폼 대비(업계 추정치) 회원 수 1.3배·MAU 1.6배 이상·세미나 평균 참석 2배 이상·연간 세미나 운영 2배, 회원 연령 40대 37%·30대 28%·50대 24%, 진료과 내과 36%·가정의학과 13%·피부/성형 13%, 지역 서울 30%·경기 28%·경상 22%.
+[닥터빌 공통 사실] 누적 가입자 65,000명 이상, MAU 18,000 이상, DAU 8,000 이상, 제휴 파트너사 36곳 이상, 주 1회 비학술 세미나(회당 평균 3,000명 수준 참여), 연간 800회 이상 세미나 운영, 세미나 회당 평균 참석 3,000~3,500명(최대 6,000명), 경쟁 플랫폼 대비(업계 추정치) 회원 수 1.3배·MAU 1.6배 이상·세미나 평균 참석 2배 이상·연간 세미나 운영 2배, 회원 연령 40대 37%·30대 28%·50대 24%, 진료과 내과 36%·가정의학과 13%·피부/성형 13%, 지역 서울 30%·경기 28%·경상 22%.
 
 규칙:
 - 위에 없는 수치·실적·고객사·가격·할인·계약 조건을 만들지 마세요. 원문에 있는 목표 수치는 '목표'로만 언급하세요.
@@ -612,6 +671,7 @@ ${ORDER.map(svcFacts).join("\n")}
 - recommend에는 요구사항 달성에 필요한 서비스 키만 넣으세요(${keys}). 담당자가 선택한 서비스가 맞지 않아도 빼지 말고 그대로 두세요.
 - services에는 담당자 선택 서비스와 recommend 서비스를 모두 포함하세요.
 - 존댓말 '~합니다/~드립니다'체. 과장 표현 남발 금지. 이모지 금지. 글자 수 제한(공백 포함)을 지키세요.
+- 제안처의 요구·상황은 '~이 필요합니다', '~을 목표로 합니다', '~을 준비하고 있습니다'처럼 중립적으로 쓰세요. '요구하셨습니다', '원하십니다', '하고자 하십니다' 같은 제안처를 높이는 서술은 쓰지 마세요.
 
 JSON만 출력하세요:
 {"analysis":{"summary":"요구사항 핵심 요약 2문장, 120자 이내","objectives":["제안처 목표 2~4개, 각 30자 이내"],"targets":["타겟 고객·진료과·지역 1~3개, 각 30자 이내"],"kpis":["원문 목표 지표 0~3개, 각 30자 이내"]},
@@ -847,23 +907,24 @@ let model=null,busy=false,ctl=null;
 function setStep(n){[1,2,3].forEach(i=>{const e=$("st"+i);e.classList.toggle("done",i<n);e.classList.toggle("on",i===n)})}
 function status(t,err){const s=$("status");s.textContent=t;s.classList.toggle("err",!!err)}
 let toastT;function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,3200)}
-function render(){$("preview").innerHTML=brochureHTML(model);$("pvLabel").textContent=`웹브로셔 미리보기 · ${model.input.client.name}${model.ai?" · AI 요구사항 분석 반영":""}`}
+function render(){$("preview").innerHTML=brochureHTML(model);if(typeof editing!=="undefined"&&editing){editing=false;setEditing(true)}$("pvLabel").textContent=`웹브로셔 미리보기 · ${model.input.client.name}${model.ai?" · AI 요구사항 분석 반영":""}`}
 
 function syncChecks(svc){document.querySelectorAll("#svcChecks input").forEach(c=>c.checked=svc.includes(c.value))}
 $("form").addEventListener("submit",async ev=>{ev.preventDefault();if(busy)return;
   const d=read(),e=validate(d);const em=$("err");
   if(e.length){em.textContent=`다음 항목을 입력하세요: ${e.join(", ")}`;em.hidden=false;return}em.hidden=true;
   if(!d.svc.length)d.svc=(TYPES[d.client.type]||TYPES["기타"]).rec.slice();
-  $("sampleBadge").hidden=true;model=baseModel(d);render();setStep(2);$("htmlBtn").disabled=false;$("pptBtn").disabled=false;$("pdfBtn").disabled=false;
-  if(!d.useAI){status("기본 문구로 웹브로셔를 만들었습니다.");return}
-  if(!(await aiAvailable())){status("이 화면에서는 AI 분석을 쓸 수 없어 기본 문구로 만들었습니다.",true);return}
+  if(editing)setEditing(false);curId=null;
+  $("sampleBadge").hidden=true;model=baseModel(d);render();setStep(2);$("htmlBtn").disabled=false;$("pptBtn").disabled=false;$("pdfBtn").disabled=false;$("editBtn").disabled=false;
+  if(!d.useAI){status("기본 문구로 웹브로셔를 만들었습니다. '문구 편집'으로 바로 고칠 수 있고, 저장된 제안서에 자동 저장됩니다.");saveHistory();return}
+  if(!(await aiAvailable())){status("이 화면에서는 AI 분석을 쓸 수 없어 기본 문구로 만들었습니다.",true);saveHistory();return}
   if((d.concept||refUrls.length)&&conceptKey()!==conceptApplied)applyConcept();
   busy=true;$("genBtn").disabled=true;$("genBtn").textContent="요구사항 분석 중…";status("AI가 요구사항을 분석하고 제안 문구를 쓰고 있습니다. 보통 20~60초 걸립니다.");
   ctl=new AbortController();
   try{const o=await runAI(aiPrompt(model),ctl.signal);model=merge(model,o);syncChecks(model.input.svc);render();if(engine==="proxy"&&accessCode)lsSet(accessCode);
     const add=model.added&&model.added.length?` 추천 서비스(${model.added.map(k=>SERVICES[k].name).join(", ")})를 추가했습니다.`:"";
-    status(`요구사항 분석과 맞춤 문구를 반영했습니다.${add} 내용 확인 후 HTML·PPT·PDF 저장을 누르세요.`)}
-  catch(x){const c=x&&x.code;status((ERRMSG[c]||"AI 응답을 받지 못했습니다.")+(c==="cancelled"?"":" 지금은 기본 문구입니다."),c!=="cancelled")}
+    status(`요구사항 분석과 맞춤 문구를 반영했습니다.${add} '문구 편집'으로 고친 뒤 HTML·PPT·PDF로 저장하세요. 저장된 제안서에 자동 저장됩니다.`);saveHistory()}
+  catch(x){const c=x&&x.code;status((ERRMSG[c]||"AI 응답을 받지 못했습니다.")+(c==="cancelled"?"":" 지금은 기본 문구입니다."),c!=="cancelled");saveHistory()}
   finally{busy=false;$("genBtn").disabled=false;$("genBtn").textContent="웹브로셔 다시 생성"}});
 
 async function saveFile(name,blob){
@@ -872,7 +933,7 @@ async function saveFile(name,blob){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast(`${name} 파일을 저장했습니다.`)}
 const fname=ext=>`닥터빌_제안서_${model.input.client.name.replace(/[\\/:*?"<>|()\s]+/g,"")}_${model.input.date.replace(/-/g,"")}.${ext}`;
 
-$("htmlBtn").addEventListener("click",()=>{if(!model)return;
+$("htmlBtn").addEventListener("click",()=>{if(!model)return;if(editing)setEditing(false);
   const doc=`<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>닥터빌 제안서 · ${esc(model.input.client.name)}</title><link rel="stylesheet" href="${fontsHref(theme)}"><style>body{margin:0}${$("bro-css").textContent}</style></head><body>${brochureHTML(model)}</body></html>`;
   saveFile(fname("html"),new Blob([doc],{type:"text/html"}))});
 
@@ -892,9 +953,9 @@ async function buildPPT(m,REC){
   const C={navy:h6(T.dark),blue:h6(T.primary),ice:h6(T.light),ink:h6(T.ink),mute:h6(T.mute),line:h6(T.line),white:"FFFFFF",mint:h6(T.accent),soft:h6(T.soft),dim:h6(T.dim),chipc:h6(T.chipc),acc2:h6(T.acc2),fitli:h6(T.fitli),pn:h6(T.pn),dline:h6(T.dline),pod:h6(T.pod)};
   const megaFs=t=>Math.min(72,Math.floor(12*72/(Math.max(8,t.length)*(FONTS[T.display].wide?0.78:0.5))));
   const d=m.input,cn=d.client.name,icon=await iconPNG(),cl=await logoPNG();let page=0,nS=0;const addS=()=>{nS++;return P.addSlide()};
-  const logo=(s,x,y,h,onDark)=>{if(onDark)s.addShape(P.ShapeType.roundRect,{x:x-0.12,y:y-0.08,w:(cl?h*cl.ar:h*3.6)+0.24,h:h+0.16,fill:{color:C.white},line:{color:C.white},rectRadius:0.08});
-    if(cl){s.addImage({data:cl.data,x,y,h,w:h*cl.ar});return}
-    if(icon)s.addImage({data:icon,x,y,w:h,h});s.addText("Dr.Ville",{x:x+h*1.1,y,w:h*2.6,h,fontFace:"Arial Black",fontSize:Math.round(h*30),color:"1667BE",bold:true,margin:0,valign:"middle"})};
+  const LG=cl||{data:LOGO_PNG,ar:3.75};
+  const logo=(s,x,y,h,onDark)=>{if(onDark)s.addShape(P.ShapeType.roundRect,{x:x-0.16,y:y-0.11,w:h*LG.ar+0.32,h:h+0.22,fill:{color:C.white},line:{color:C.white},rectRadius:0.08});
+    s.addImage({data:LG.data,x,y,h,w:h*LG.ar})};
   const foot=s=>{page++;s.addShape(P.ShapeType.line,{x:0.6,y:7.0,w:W-1.2,h:0,line:{color:C.line,width:0.75}});
     s.addText(`Dr.Ville  |  ${cn} 제안서`,{x:0.6,y:7.05,w:7,h:0.3,fontFace:KR,fontSize:9,color:C.mute,margin:0});
     s.addText(String(page).padStart(2,"0"),{x:W-1.6,y:7.05,w:1,h:0.3,fontFace:D,fontSize:11,color:C.blue,align:"right",margin:0})};
@@ -917,31 +978,20 @@ async function buildPPT(m,REC){
     const x=0.6+i*4.1;s.addText(r[0],{x,y:6.15,w:3.9,h:0.3,fontFace:D,fontSize:13,color:C.dim,margin:0,charSpacing:2});
     s.addText(r[1],{x,y:6.45,w:3.9,h:0.4,fontFace:KR,fontSize:14,bold:true,color:C.white,margin:0,fit:"shrink"})});
 
-  // 2 Proposal
-  s=addS();s.background={color:C.white};head(s,"Proposal","제안 배경");
-  s.addText(m.introHeadline,{x:0.6,y:2.1,w:6.3,h:0.9,fontFace:KR,fontSize:22,bold:true,color:C.ink,margin:0,valign:"top"});
-  s.addText(m.introBody,{x:0.6,y:3.05,w:6.3,h:2.5,fontFace:KR,fontSize:13,color:C.mute,margin:0,valign:"top",lineSpacingMultiple:1.35});
-  s.addShape(P.ShapeType.rect,{x:7.3,y:2.1,w:5.43,h:3.55,fill:{color:C.ice},line:{type:"none"}});
-  s.addText(`KEY POINTS FOR ${cn}`,{x:7.6,y:2.3,w:4.9,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0});
-  const nb=m.introBullets.length,rowH=Math.min(0.72,2.6/nb);
-  m.introBullets.forEach((b,i)=>{const y=2.85+i*rowH;s.addText(String(i+1).padStart(2,"0"),{x:7.6,y,w:0.5,h:rowH,fontFace:D,fontSize:20,color:C.blue,margin:0,valign:"top"});
-    s.addText(b,{x:8.15,y:y+0.02,w:4.4,h:rowH,fontFace:KR,fontSize:nb>3||b.length>44?11.5:13,bold:true,color:C.ink,margin:0,valign:"top",fit:"shrink"})});
-  s.addShape(P.ShapeType.rect,{x:0.6,y:5.95,w:W-1.2,h:0.8,fill:{color:C.navy},line:{type:"none"}});
-  s.addText(m.statement,{x:0.9,y:5.95,w:W-1.8,h:0.8,fontFace:KR,fontSize:16,bold:true,color:C.white,margin:0,valign:"middle"});foot(s);
-
-  const TH={fontFace:KR,fontSize:12,bold:true,color:C.white,fill:{color:C.navy},margin:[0.04,0.12,0.04,0.12],valign:"middle"};
-  const TD=(o={})=>Object.assign({fontFace:KR,fontSize:12,color:C.ink,fill:{color:C.white},margin:[0.04,0.12,0.04,0.12],valign:"middle",border:[{type:"none"},{type:"none"},{pt:0.75,color:C.line},{type:"none"}]},o);
-  // Insight (요구사항 분석)
-  if(m.analysis){const a=m.analysis;s=addS();s.background={color:C.white};head(s,"Insight","요구사항 분석 및 대응 방안");
-    let y0=1.95;if(a.summary){s.addText(a.summary,{x:0.6,y:1.95,w:W-1.2,h:0.5,fontFace:KR,fontSize:12,color:C.mute,margin:0,valign:"top"});y0=2.5}
-    [["OBJECTIVE","목표",a.objectives],["TARGET","타겟",a.targets],["KPI","목표 지표",a.kpis]].forEach((g,i)=>{const x=0.6+i*4.1,w=3.93;
-      s.addShape(P.ShapeType.rect,{x,y:y0,w,h:1.35,fill:{color:C.ice},line:{type:"none"}});
-      s.addText([{text:g[0]+"  ",options:{fontFace:D,fontSize:13,color:C.blue}},{text:g[1],options:{fontFace:KR,fontSize:12,bold:true,color:C.ink}}],{x:x+0.18,y:y0+0.08,w:w-0.36,h:0.3,margin:0});
-      const items=g[2].length?g[2]:["제안 협의 시 함께 설정"];
-      s.addText(items.map((t,n)=>({text:t,options:{bullet:{indent:10},breakLine:n<items.length-1}})),{x:x+0.18,y:y0+0.42,w:w-0.36,h:0.88,fontFace:KR,fontSize:10.5,color:C.ink,margin:0,valign:"top",fit:"shrink"})});
-    if(m.reqMap&&m.reqMap.length){const rows=[["요구사항","닥터빌 대응 방안","활용 상품"].map(t=>({text:t,options:TH}))].concat(m.reqMap.slice(0,5).map(x=>[x.need,x.solution,x.product].map((t,i)=>({text:t,options:TD({fontSize:10.5,bold:i!==1,color:i===2?C.blue:i===1?C.mute:C.ink})}))));
-      s.addTable(rows,{x:0.6,y:y0+1.55,w:W-1.2,colW:[3.4,6.2,W-1.2-9.6],rowH:0.4})}
-    foot(s)}
+  // 2 Contents (목차)
+  const toc=(()=>{let p=3;const L=[["01","회사 소개","Why Dr.Ville · 회원 구성 · 파트너",p]];p+=3;
+    const prop=["제안 배경",m.analysis?"요구사항 분석":null,"추천 서비스"].filter(Boolean);L.push(["02","맞춤 제안",prop.join(" · "),p]);p+=prop.length;
+    L.push(["03","서비스 안내",["광고 상품"].concat(d.svc.map(k=>SERVICES[k].name)).join(" · "),p]);p+=1+d.svc.length+(d.svc.includes("webinar")?1:0);
+    const npr=d.price?priceRows(d).length:0;if(npr){L.push(["04","가격 안내",`${PRICE.year}년 서비스 단가`,p]);p+=npr}
+    L.push([String(L.length+1).padStart(2,"0"),"진행 절차","상담부터 결과 리포트까지",p]);return L})();
+  s=addS();s.background={color:C.white};head(s,"Contents","목차");
+  toc.forEach((r,i)=>{const y=2.1+i*0.92;s.addShape(P.ShapeType.line,{x:0.6,y,w:W-1.2,h:0,line:{color:C.line,width:0.75}});
+    s.addText(r[0],{x:0.6,y:y+0.1,w:1.1,h:0.7,fontFace:D,fontSize:34,bold:FONTS[T.display].wide,color:C.blue,margin:0,valign:"middle"});
+    s.addText(r[1],{x:1.8,y:y+0.1,w:3.0,h:0.7,fontFace:KR,fontSize:19,bold:true,color:C.ink,margin:0,valign:"middle"});
+    s.addText(r[2],{x:4.9,y:y+0.1,w:6.6,h:0.7,fontFace:KR,fontSize:12.5,color:C.mute,margin:0,valign:"middle",fit:"shrink"});
+    s.addText("p. "+String(r[3]).padStart(2,"0"),{x:W-1.9,y:y+0.1,w:1.3,h:0.7,fontFace:KR,fontSize:12,bold:true,color:C.blue,margin:0,align:"right",valign:"middle"})});
+  s.addShape(P.ShapeType.line,{x:0.6,y:2.1+toc.length*0.92,w:W-1.2,h:0,line:{color:C.line,width:0.75}});
+  foot(s);
 
   // 3 Why Dr.Ville (경쟁 비교)
   s=addS();s.background={color:C.ice};head(s,"Why Dr.Ville","숫자로 비교하는 닥터빌의 도달력");
@@ -959,8 +1009,8 @@ async function buildPPT(m,REC){
       s.addText(r[2],{x:x+1.82,y,w:0.9,h:0.26,fontFace:KR,fontSize:8.5,bold:r[3],color:r[3]?C.blue:C.mute,margin:0,align:"right",valign:"middle",fit:"shrink"})});
     s.addText(c[8],{x:x+0.2,y:y0+2.82,w:w-0.4,h:0.6,fontFace:KR,fontSize:9.5,color:C.mute,margin:0,valign:"top"})});
   s.addShape(P.ShapeType.rect,{x:0.6,y:5.85,w:W-1.2,h:0.6,fill:{color:C.navy},line:{type:"none"}});
-  s.addText("더 많은 의사에게, 더 자주, 더 확실하게 닿습니다.",{x:0.85,y:5.85,w:6.5,h:0.6,fontFace:KR,fontSize:14,bold:true,color:C.white,margin:0,valign:"middle"});
-  s.addText(SOURCE.subStats.map(x=>x[0]+" "+x[1]).join("  ·  "),{x:7.2,y:5.85,w:W-1.2-6.85,h:0.6,fontFace:KR,fontSize:10.5,color:"9FB3C8",margin:0,align:"right",valign:"middle"});
+  s.addText("더 많은 의사에게, 더 자주, 더 확실하게 닿습니다.",{x:0.85,y:5.85,w:5.2,h:0.6,fontFace:KR,fontSize:14,bold:true,color:C.white,margin:0,valign:"middle"});
+  s.addText(SOURCE.subStats.map(x=>x[0]+" "+x[1]).join("  ·  "),{x:6.0,y:5.85,w:W-0.85-6.0,h:0.6,fontFace:KR,fontSize:10,color:"9FB3C8",margin:0,align:"right",valign:"middle",fit:"shrink"});
   s.addText(SOURCE.compareNote,{x:0.6,y:6.55,w:W-1.2,h:0.3,fontFace:KR,fontSize:9,color:C.mute,margin:0});
   foot(s);
 
@@ -977,33 +1027,56 @@ async function buildPPT(m,REC){
     s.addText(p[2],{x:x+0.2,y:5.6,w:w-0.4,h:0.8,fontFace:KR,fontSize:10.5,color:C.mute,margin:0,valign:"top"})});
   foot(s);
 
-  // 4.. Services
-  d.svc.forEach((k,i)=>{const sv=SERVICES[k],f=m.services[k];s=addS();s.background={color:C.white};
-    s.addText(`SERVICE ${String(i+1).padStart(2,"0")}  ·  ${sv.en}`,{x:0.6,y:0.5,w:8,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0,charSpacing:2});
-    s.addText(sv.name,{x:0.6,y:0.9,w:8,h:0.75,fontFace:KR,fontSize:30,bold:true,color:C.ink,margin:0,valign:"middle"});
-    s.addText(sv.sub,{x:0.6,y:1.65,w:7.3,h:0.6,fontFace:KR,fontSize:13,color:C.mute,margin:0,valign:"top"});
-    sv.why.forEach((w,n)=>{const y=2.45+n*0.88;s.addShape(P.ShapeType.rect,{x:0.6,y,w:0.06,h:0.72,fill:{color:C.line},line:{type:"none"}});
-      s.addText(w[0],{x:0.85,y,w:7,h:0.3,fontFace:KR,fontSize:14,bold:true,color:C.ink,margin:0});
-      s.addText(w[1],{x:0.85,y:y+0.32,w:7,h:0.42,fontFace:KR,fontSize:11,color:C.mute,margin:0,valign:"top"})});
-    s.addText("주요 상품",{x:0.6,y:5.2,w:3,h:0.3,fontFace:KR,fontSize:11,bold:true,color:C.blue,margin:0});
-    const half=sv.items.length>3?Math.ceil(sv.items.length/2):sv.items.length,cols=half<sv.items.length?[sv.items.slice(0,half),sv.items.slice(half)]:[sv.items];
-    cols.forEach((col,ci)=>s.addText(col.flatMap((it,n)=>[{text:it[0]+"  ",options:{bold:true,color:C.ink}},{text:it[1],options:{color:C.mute,breakLine:n<col.length-1}}]),
-      {x:0.6+ci*3.7,y:5.5,w:cols.length>1?3.55:7.3,h:1.3,fontFace:KR,fontSize:cols.length>1?10.5:11.5,margin:0,valign:"top",paraSpaceAfter:4}));
-    s.addShape(P.ShapeType.rect,{x:8.3,y:0.6,w:4.43,h:6.15,fill:{color:C.navy},line:{type:"none"}});
-    s.addText(`FOR ${cn}`,{x:8.6,y:0.85,w:3.9,h:0.4,fontFace:D,fontSize:18,color:C.acc2,margin:0,fit:"shrink"});
-    s.addText(f.headline,{x:8.6,y:1.35,w:3.85,h:1.3,fontFace:KR,fontSize:17,bold:true,color:C.white,margin:0,valign:"top"});
-    f.fit.forEach((x,n)=>{const y=2.95+n*1.15;s.addShape(P.ShapeType.rect,{x:8.6,y:y+0.1,w:0.1,h:0.1,fill:{color:C.mint},line:{type:"none"}});
-      s.addText(x,{x:8.85,y,w:3.6,h:1.0,fontFace:KR,fontSize:12.5,color:C.fitli,margin:0,valign:"top"})});
-    foot(s)});
+  // Partners
+  s=addS();s.background={color:C.ice};head(s,"Our partners",SOURCE.partnerLine);
+  SOURCE.partners.forEach((p,i)=>{const col=i%5,row=Math.floor(i/5),x=0.6+col*2.43,y=2.2+row*1.4;
+    s.addShape(P.ShapeType.rect,{x,y,w:2.35,h:1.3,fill:{color:C.white},line:{type:"none"}});
+    s.addText(p,{x,y,w:2.35,h:1.3,fontFace:"Arial Black",fontSize:14,color:C.pn,align:"center",valign:"middle",margin:0})});
+  foot(s);
 
-  // Ad products (플랫폼 광고 선택 시)
-  if(d.svc.includes("platform")){s=addS();s.background={color:C.white};head(s,"Ad products","광고 상품 안내  ·  "+ADS.lead);
-    const rows=[["광고 상품","도달 타겟","특징"].map(t=>({text:t,options:TH}))].concat(ADS.rows.map(r=>r.map((t,i)=>({text:t,options:TD(i===0?{bold:true}:{color:i===2?C.ink:C.mute})}))));
-    s.addTable(rows,{x:0.6,y:2.1,w:W-1.2,colW:[3.9,4.0,W-1.2-7.9],rowH:0.5});
-    s.addText(ADS.note,{x:0.6,y:6.25,w:W-1.2,h:0.3,fontFace:KR,fontSize:9.5,color:C.mute,margin:0});foot(s)}
+  const TH={fontFace:KR,fontSize:12,bold:true,color:C.white,fill:{color:C.navy},margin:[0.04,0.12,0.04,0.12],valign:"middle"};
+  const TD=(o={})=>Object.assign({fontFace:KR,fontSize:12,color:C.ink,fill:{color:C.white},margin:[0.04,0.12,0.04,0.12],valign:"middle",border:[{type:"none"},{type:"none"},{pt:0.75,color:C.line},{type:"none"}]},o);
+  // 2 Proposal
+  s=addS();s.background={color:C.white};head(s,"Proposal","제안 배경");
+  s.addText(m.introHeadline,{x:0.6,y:2.1,w:6.3,h:0.9,fontFace:KR,fontSize:22,bold:true,color:C.ink,margin:0,valign:"top"});
+  s.addText(m.introBody,{x:0.6,y:3.05,w:6.3,h:2.5,fontFace:KR,fontSize:13,color:C.mute,margin:0,valign:"top",lineSpacingMultiple:1.35});
+  s.addShape(P.ShapeType.rect,{x:7.3,y:2.1,w:5.43,h:3.55,fill:{color:C.ice},line:{type:"none"}});
+  s.addText(`KEY POINTS FOR ${cn}`,{x:7.6,y:2.3,w:4.9,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0});
+  const nb=m.introBullets.length,rowH=Math.min(0.72,2.6/nb);
+  m.introBullets.forEach((b,i)=>{const y=2.85+i*rowH;s.addText(String(i+1).padStart(2,"0"),{x:7.6,y,w:0.5,h:rowH,fontFace:D,fontSize:20,color:C.blue,margin:0,valign:"top"});
+    s.addText(b,{x:8.15,y:y+0.02,w:4.4,h:rowH,fontFace:KR,fontSize:nb>3||b.length>44?11.5:13,bold:true,color:C.ink,margin:0,valign:"top",fit:"shrink"})});
+  s.addShape(P.ShapeType.rect,{x:0.6,y:5.95,w:W-1.2,h:0.8,fill:{color:C.navy},line:{type:"none"}});
+  s.addText(m.statement,{x:0.9,y:5.95,w:W-1.8,h:0.8,fontFace:KR,fontSize:16,bold:true,color:C.white,margin:0,valign:"middle"});foot(s);
+
+  // Insight (요구사항 분석)
+  if(m.analysis){const a=m.analysis;s=addS();s.background={color:C.white};head(s,"Insight","요구사항 분석 및 대응 방안");
+    let y0=1.95;if(a.summary){s.addText(a.summary,{x:0.6,y:1.95,w:W-1.2,h:0.5,fontFace:KR,fontSize:12,color:C.mute,margin:0,valign:"top"});y0=2.5}
+    const grp=[["OBJECTIVE","목표",a.objectives],["TARGET","타겟",a.targets]].concat(a.kpis&&a.kpis.length?[["KPI","목표 지표",a.kpis]]:[]),gw=(W-1.2-0.17*(grp.length-1))/grp.length;
+    grp.forEach((g,i)=>{const x=0.6+i*(gw+0.17),w=gw;
+      s.addShape(P.ShapeType.rect,{x,y:y0,w,h:1.35,fill:{color:C.ice},line:{type:"none"}});
+      s.addText([{text:g[0]+"  ",options:{fontFace:D,fontSize:13,color:C.blue}},{text:g[1],options:{fontFace:KR,fontSize:12,bold:true,color:C.ink}}],{x:x+0.18,y:y0+0.08,w:w-0.36,h:0.3,margin:0});
+      const items=g[2].length?g[2]:["제안 협의 시 함께 설정"];
+      s.addText(items.map((t,n)=>({text:t,options:{bullet:{indent:10},breakLine:n<items.length-1}})),{x:x+0.18,y:y0+0.42,w:w-0.36,h:0.88,fontFace:KR,fontSize:10.5,color:C.ink,margin:0,valign:"top",fit:"shrink"})});
+    if(m.reqMap&&m.reqMap.length){const rows=[["요구사항","닥터빌 대응 방안","활용 상품"].map(t=>({text:t,options:TH}))].concat(m.reqMap.slice(0,5).map(x=>[x.need,x.solution,x.product].map((t,i)=>({text:t,options:TD({fontSize:10.5,bold:i!==1,color:i===2?C.blue:i===1?C.mute:C.ink})}))));
+      s.addTable(rows,{x:0.6,y:y0+1.55,w:W-1.2,colW:[3.4,6.2,W-1.2-9.6],rowH:0.4})}
+    foot(s)}
+
+  // Recommendation (추천 서비스 · 고객사별)
+  s=addS();s.background={color:C.white};head(s,"Recommendation",`${cn} 추천 서비스`);
+  {const n=d.svc.length,gap=0.25,cw=(W-1.2-gap*(n-1))/n,top=m.recReason?2.5:2.05,h=6.75-top;
+    if(m.recReason)s.addText(m.recReason,{x:0.6,y:1.95,w:W-1.2,h:0.42,fontFace:KR,fontSize:12.5,color:C.mute,margin:0,valign:"top",fit:"shrink"});
+    d.svc.forEach((k,i)=>{const sv=SERVICES[k],f=m.services[k],x=0.6+i*(cw+gap);
+      s.addShape(P.ShapeType.rect,{x,y:top,w:cw,h,fill:{color:C.navy},line:{type:"none"}});
+      s.addText(`SERVICE ${String(i+1).padStart(2,"0")}  ·  ${sv.en}`,{x:x+0.3,y:top+0.25,w:cw-0.6,h:0.35,fontFace:D,fontSize:15,color:C.acc2,margin:0,charSpacing:1,fit:"shrink"});
+      s.addText(sv.name,{x:x+0.3,y:top+0.62,w:cw-0.6,h:0.4,fontFace:KR,fontSize:13,bold:true,color:C.soft,margin:0});
+      s.addText(f.headline,{x:x+0.3,y:top+1.05,w:cw-0.6,h:1.0,fontFace:KR,fontSize:n>2?15:17,bold:true,color:C.white,margin:0,valign:"top",fit:"shrink"});
+      const fy=top+2.15,fh=(h-2.4)/Math.max(1,f.fit.length);
+      f.fit.forEach((t,q)=>{const y=fy+q*fh;s.addShape(P.ShapeType.rect,{x:x+0.3,y:y+0.1,w:0.1,h:0.1,fill:{color:C.mint},line:{type:"none"}});
+        s.addText(t,{x:x+0.55,y,w:cw-0.85,h:fh-0.05,fontFace:KR,fontSize:n>2?11:12.5,color:C.fitli,margin:0,valign:"top",fit:"shrink"})})})}
+  foot(s);
 
   // Live seminar detail (웹 세미나 선택 시)
-  if(d.svc.includes("webinar")){s=addS();s.background={color:C.white};head(s,"Live seminar","라이브세미나 운영 유형  ·  평균 3,000~3,500명, 최대 6,000명 동시 입장");
+  const liveSlide=()=>{s=addS();s.background={color:C.white};head(s,"Live seminar","라이브세미나 운영 유형  ·  회당 평균 3,000~3,500명, 최대 6,000명 동시 입장");
     SEMINAR.formats.forEach((f,i)=>{const x=0.6+i*4.1,w=3.93;s.addShape(P.ShapeType.rect,{x,y:2.05,w,h:1.4,fill:{color:C.ice},line:{type:"none"}});
       s.addText(f[0],{x:x+0.2,y:2.15,w:w-0.4,h:0.3,fontFace:D,fontSize:14,color:C.blue,margin:0,charSpacing:1});
       s.addText(f[1],{x:x+0.2,y:2.45,w:w-0.4,h:0.35,fontFace:KR,fontSize:15,bold:true,color:C.ink,margin:0});
@@ -1018,15 +1091,29 @@ async function buildPPT(m,REC){
       s.addText([{text:String(i+1)+"  ",options:{fontFace:D,fontSize:20,color:C.blue}},{text:p[0],options:{fontFace:KR,fontSize:13,bold:true,color:C.ink}}],{x,y:5.42,w,h:0.42,margin:0,valign:"middle"});
       s.addText(p[1],{x,y:5.86,w,h:0.26,fontFace:KR,fontSize:10.5,bold:true,color:C.blue,margin:0});
       s.addText(p[2],{x,y:6.12,w,h:0.3,fontFace:KR,fontSize:10.5,color:C.mute,margin:0})});
-    s.addText(SEMINAR.slots,{x:0.6,y:6.55,w:W-1.2,h:0.3,fontFace:KR,fontSize:9.5,color:C.mute,margin:0});foot(s)}
+    s.addText("* 참석 규모는 예산과 모객 상한(cap) 설정에 따라 달라집니다.",{x:0.6,y:6.55,w:W-1.2,h:0.3,fontFace:KR,fontSize:9.5,color:C.mute,margin:0});foot(s)};
 
-  // Process
-  s=addS();s.background={color:C.white};head(s,"How to work","진행 프로세스");
-  SOURCE.process.forEach((p,i)=>{const x=0.6+i*3.1;s.addShape(P.ShapeType.line,{x,y:2.3,w:2.85,h:0,line:{color:C.ink,width:1.5}});
-    s.addText(String(i+1).padStart(2,"0"),{x,y:2.45,w:2.85,h:0.9,fontFace:D,fontSize:48,color:C.blue,margin:0,valign:"top"});
-    s.addText(p[0],{x,y:3.45,w:2.85,h:0.45,fontFace:KR,fontSize:16,bold:true,color:C.ink,margin:0});
-    s.addText(m.process[i]||p[1],{x,y:3.95,w:2.75,h:1.6,fontFace:KR,fontSize:12,color:C.mute,margin:0,valign:"top",lineSpacingMultiple:1.25})});
-  foot(s);
+  // Ad products (서비스 전체 안내 · 항상)
+  {s=addS();s.background={color:C.white};head(s,"Ad products","광고 상품 안내  ·  "+ADS.lead);
+    const rows=[["광고 상품","도달 타겟","특징"].map(t=>({text:t,options:TH}))].concat(ADS.rows.map(r=>r.map((t,i)=>({text:t,options:TD(i===0?{bold:true}:{color:i===2?C.ink:C.mute})}))));
+    s.addTable(rows,{x:0.6,y:2.1,w:W-1.2,colW:[3.9,4.0,W-1.2-7.9],rowH:0.5});
+    s.addText(ADS.note,{x:0.6,y:6.25,w:W-1.2,h:0.3,fontFace:KR,fontSize:9.5,color:C.mute,margin:0});foot(s)}
+
+  // Services (서비스별 상세 · 일반 안내) — 웹 세미나 뒤에 라이브세미나 상세
+  d.svc.forEach((k,i)=>{const sv=SERVICES[k];s=addS();s.background={color:C.white};
+    s.addText(`SERVICE ${String(i+1).padStart(2,"0")}  ·  ${sv.en}`,{x:0.6,y:0.5,w:8,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0,charSpacing:2});
+    s.addText(sv.name,{x:0.6,y:0.9,w:8,h:0.75,fontFace:KR,fontSize:30,bold:true,color:C.ink,margin:0,valign:"middle"});
+    s.addText(sv.sub,{x:0.6,y:1.65,w:7.3,h:0.6,fontFace:KR,fontSize:13,color:C.mute,margin:0,valign:"top"});
+    sv.why.forEach((w,n)=>{const y=2.55+n*1.3;s.addShape(P.ShapeType.rect,{x:0.6,y,w:0.06,h:1.05,fill:{color:C.line},line:{type:"none"}});
+      s.addText(w[0],{x:0.85,y,w:7,h:0.34,fontFace:KR,fontSize:15,bold:true,color:C.ink,margin:0});
+      s.addText(w[1],{x:0.85,y:y+0.38,w:7,h:0.66,fontFace:KR,fontSize:11.5,color:C.mute,margin:0,valign:"top",fit:"shrink"})});
+    s.addShape(P.ShapeType.rect,{x:8.3,y:0.6,w:4.43,h:6.15,fill:{color:C.ice},line:{type:"none"}});
+    s.addText("KEY PRODUCTS",{x:8.6,y:0.85,w:3.9,h:0.4,fontFace:D,fontSize:18,color:C.blue,margin:0,charSpacing:1});
+    s.addText("주요 상품",{x:8.6,y:1.25,w:3.9,h:0.4,fontFace:KR,fontSize:15,bold:true,color:C.ink,margin:0});
+    const ih=Math.min(0.9,4.75/sv.items.length);
+    sv.items.forEach((it,n)=>{const y=1.9+n*ih;s.addText(it[0],{x:8.6,y,w:3.85,h:0.32,fontFace:KR,fontSize:12.5,bold:true,color:C.ink,margin:0});
+      s.addText(it[1],{x:8.6,y:y+0.33,w:3.85,h:ih-0.38,fontFace:KR,fontSize:10.5,color:C.mute,margin:0,valign:"top",fit:"shrink"})});
+    foot(s);if(k==="webinar")liveSlide()});
 
   // Price (단가 포함 선택 시) — 서비스별 1장, 행이 많으면 2단 배치
   const pg=priceRows(d);
@@ -1042,11 +1129,12 @@ async function buildPPT(m,REC){
       const note=(k==="webinar"?PRICE.webinarNote+"  ·  ":"")+PRICE.note+(d.svc.includes("conference")?" / 컨퍼런스는 별도 견적":"");
       s.addText(note,{x:0.6,y:6.5,w:W-1.2,h:0.42,fontFace:KR,fontSize:8.5,color:C.mute,margin:0,valign:"top"});foot(s)})}
 
-  // Partners
-  s=addS();s.background={color:C.ice};head(s,"Our partners",SOURCE.partnerLine);
-  SOURCE.partners.forEach((p,i)=>{const col=i%5,row=Math.floor(i/5),x=0.6+col*2.43,y=2.2+row*1.4;
-    s.addShape(P.ShapeType.rect,{x,y,w:2.35,h:1.3,fill:{color:C.white},line:{type:"none"}});
-    s.addText(p,{x,y,w:2.35,h:1.3,fontFace:"Arial Black",fontSize:14,color:C.pn,align:"center",valign:"middle",margin:0})});
+  // Process
+  s=addS();s.background={color:C.white};head(s,"How to work","진행 프로세스");
+  SOURCE.process.forEach((p,i)=>{const x=0.6+i*3.1;s.addShape(P.ShapeType.line,{x,y:2.3,w:2.85,h:0,line:{color:C.ink,width:1.5}});
+    s.addText(String(i+1).padStart(2,"0"),{x,y:2.45,w:2.85,h:0.9,fontFace:D,fontSize:48,color:C.blue,margin:0,valign:"top"});
+    s.addText(p[0],{x,y:3.45,w:2.85,h:0.45,fontFace:KR,fontSize:16,bold:true,color:C.ink,margin:0});
+    s.addText(m.process[i]||p[1],{x,y:3.95,w:2.75,h:1.6,fontFace:KR,fontSize:12,color:C.mute,margin:0,valign:"top",lineSpacingMultiple:1.25})});
   foot(s);
 
   // Closing
@@ -1088,18 +1176,25 @@ function layoutText(ctx,runs,base,T,maxW,scale){
   for(const r of runs){const o={...base,...(r.options||{})};const parts=String(r.text??"").split("\n");
     parts.forEach((p,i)=>{if(i>0)paras.push([]);if(p)paras[paras.length-1].push({t:p,o})});if(o.breakLine)paras.push([])}
   if(paras.length>1&&!paras[paras.length-1].length)paras.pop();
-  const lines=[];let total=0;
-  for(const para of paras){const o0=para[0]?para[0].o:base;const bullet=o0.bullet?"•  ":"";const indent=bullet?(o0.fontSize||18)*2*scale*0.9:0;
-    let line=[],lw=0,lh=0;const push=()=>{const px=Math.max(lh,(o0.fontSize||18)*2*scale),h=px*1.22*(o0.lineSpacingMultiple||1);lines.push({segs:line,w:lw,h,px,pa:0,align:o0.align||base.align||"left"});total+=h;line=[];lw=0;lh=0};
+  const wrap=(para,W)=>{const o0=para[0]?para[0].o:base;const bullet=o0.bullet?"•  ":"";const indent=bullet?(o0.fontSize||18)*2*scale*0.9:0;
+    const lines=[];let total=0,split=false;let line=[],lw=0,lh=0;
+    const push=()=>{const px=Math.max(lh,(o0.fontSize||18)*2*scale),h=px*1.22*(o0.lineSpacingMultiple||1);lines.push({segs:line,w:lw,h,px,pa:0,align:o0.align||base.align||"left"});total+=h;line=[];lw=0;lh=0};
     if(bullet){const F=fontStr(o0,T,scale);ctx.font=F.css;line.push({t:"•",o:o0,css:F.css,x:0});lw=indent;lh=F.px}
     for(const seg of para){const F=fontStr(seg.o,T,scale);ctx.font=F.css;ctx.letterSpacing=(seg.o.charSpacing?seg.o.charSpacing*2*scale:0)+"px";
       const toks=seg.t.split(/(\s+)/).filter(x=>x!=="");
-      for(const tk of toks){let tw=ctx.measureText(tk).width;
-        if(lw+tw>maxW&&lw>indent+0.5&&!/^\s+$/.test(tk)){push();line.isCont=true;lw=indent;}
-        if(/^\s+$/.test(tk)&&lw<=indent+0.5)continue;
-        if(tw>maxW-lw){for(const ch of [...tk]){const cw=ctx.measureText(ch).width;if(lw+cw>maxW&&lw>indent+0.5){push();line.isCont=true;lw=indent}line.push({t:ch,o:seg.o,css:F.css,x:lw});lw+=cw;lh=Math.max(lh,F.px)}continue}
+      for(const tk of toks){const tw=ctx.measureText(tk).width;const sp=/^\s+$/.test(tk);
+        if(lw+tw>W&&lw>indent+0.5&&!sp){push();lw=indent}
+        if(sp&&lw<=indent+0.5)continue;
+        if(!sp&&tw>W-lw){split=true;for(const ch of [...tk]){const cw=ctx.measureText(ch).width;if(lw+cw>W&&lw>indent+0.5){push();lw=indent}line.push({t:ch,o:seg.o,css:F.css,x:lw});lw+=cw;lh=Math.max(lh,F.px)}continue}
         line.push({t:tk,o:seg.o,css:F.css,x:lw});lw+=tw;lh=Math.max(lh,F.px)}}
-    push();const pa=(o0.paraSpaceAfter||0)*2*scale;if(pa){const ll=lines[lines.length-1];ll.h+=pa;ll.pa=pa;total+=pa}}
+    push();const pa=(o0.paraSpaceAfter||0)*2*scale;if(pa){const ll=lines[lines.length-1];ll.h+=pa;ll.pa=pa;total+=pa}
+    return {lines,total,split}};
+  const lines=[];let total=0;
+  for(const para of paras){let R=wrap(para,maxW);const n=R.lines.length;
+    // 2~4줄 문단은 줄 길이를 고르게 맞춰 마지막 줄에 단어 한두 개만 남지 않게 함
+    if(n>=2&&n<=4&&!R.split){let lo=maxW*0.55,hi=maxW;for(let k=0;k<7;k++){const mid=(lo+hi)/2,r2=wrap(para,mid);if(r2.lines.length<=n&&!r2.split)hi=mid;else lo=mid}
+      if(hi<maxW-1)R=wrap(para,hi)}
+    for(const l of R.lines)lines.push(l);total+=R.total}
   ctx.letterSpacing="0px";return {lines,total}}
 function drawTextBox(ctx,text,o,T){const runs=Array.isArray(text)?text:[{text,options:{}}];
   const [it,ir,ib,il]=insetOf(o.margin,3.6);const x=o.x*PX+il,y=o.y*PX+it,w=Math.max(4,(o.w||1)*PX-il-ir),h=Math.max(4,(o.h||0.3)*PX-it-ib);
@@ -1148,6 +1243,52 @@ $("pdfBtn").addEventListener("click",async()=>{if(!model||busy)return;
   catch(e){console.error(e);status(e&&e.code==="no_pdf"?"PDF 라이브러리를 불러오지 못했습니다. 네트워크 확인 후 새로고침하세요.":"PDF를 만들지 못했습니다. 다시 시도하세요.",true)}
   finally{b.disabled=false;b.textContent="PDF 저장"}});
 window.__dv={buildPDF,parseLoose,lookupOrg,orgCache,researchPrompt,buildPPT,get model(){return model},set model(v){model=v},brochureHTML,merge,aiPrompt,render:()=>render()};
+
+/* ---------- 저장된 제안서 (이 브라우저, 최근 30개) ---------- */
+const HK="dv_history_v1";let curId=null,hTimer=null;
+function hGet(){try{const a=JSON.parse(localStorage.getItem(HK)||"[]");return Array.isArray(a)?a:[]}catch(e){return[]}}
+function hSet(a){try{localStorage.setItem(HK,JSON.stringify(a));return true}catch(e){if(a.length>1){a.pop();return hSet(a)}return false}}
+function formState(){const f={};document.querySelectorAll("#form input,#form select,#form textarea").forEach(el=>{if(!el.id||["file","password"].includes(el.type)||el.id==="refUrl")return;f[el.id]=el.type==="checkbox"?el.checked:el.value});return f}
+function restoreForm(f){for(const[k,v]of Object.entries(f||{})){const el=$(k);if(!el||el.type==="file"||el.type==="password")continue;if(el.type==="checkbox")el.checked=!!v;else el.value=v}}
+function saveHistory(){if(!model)return;const a=hGet();const rec={id:curId||("p"+Date.now().toString(36)),at:new Date().toISOString(),client:model.input.client.name,type:model.input.client.type,
+    svc:model.input.svc,ai:!!model.ai,form:formState(),refUrls:refUrls.slice(),theme,aiTheme,model};
+  curId=rec.id;const i=a.findIndex(x=>x.id===rec.id);if(i>=0)a.splice(i,1);a.unshift(rec);if(a.length>30)a.length=30;
+  if(!hSet(a))toast("브라우저 저장 공간이 부족해 저장하지 못했습니다. 파일로 내보내 보관하세요.");renderHistory()}
+function saveSoon(){clearTimeout(hTimer);hTimer=setTimeout(saveHistory,700)}
+function fmtAt(iso){const t=new Date(iso),p=n=>String(n).padStart(2,"0");return `${t.getFullYear()}.${p(t.getMonth()+1)}.${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}`}
+function renderHistory(){const a=hGet();$("histCount").textContent=a.length;
+  $("histList").innerHTML=a.length?a.map(r=>`<li class="${r.id===curId?"cur":""}"><button type="button" class="hl" data-id="${esc(r.id)}">${esc(r.client||"(기관명 없음)")}<small>${esc(r.type||"")} · ${esc((r.svc||[]).map(k=>SERVICES[k]?SERVICES[k].name:k).join(", "))} · ${fmtAt(r.at)}${r.ai?" · AI":""}</small></button><button type="button" class="hd" data-id="${esc(r.id)}">삭제</button></li>`).join(""):`<li><small style="color:var(--app-mute);font-size:12px">아직 저장된 제안서가 없습니다.</small></li>`;
+  $("histList").querySelectorAll(".hl").forEach(b=>b.onclick=()=>loadHistory(b.dataset.id));
+  $("histList").querySelectorAll(".hd").forEach(b=>b.onclick=()=>{if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="삭제 확인";setTimeout(()=>{if(b.isConnected){b.classList.remove("arm");b.textContent="삭제"}},3000);return}
+    const id=b.dataset.id;hSet(hGet().filter(x=>x.id!==id));if(curId===id)curId=null;renderHistory();toast("저장된 제안서를 삭제했습니다.")})}
+function loadHistory(id){if(busy)return;const r=hGet().find(x=>x.id===id);if(!r)return;setEditing(false);
+  restoreForm(r.form);refUrls=Array.isArray(r.refUrls)?r.refUrls.slice(0,3):[];renderUrls();
+  aiTheme=r.aiTheme||null;setPresetOptions((r.form&&r.form.cPreset)||"default");if(r.form&&r.form.cPreset)$("cPreset").value=r.form.cPreset;
+  model=r.model;curId=r.id;if(model.input&&model.input.org){orgCache.set(model.input.client.name,model.input.org);orgCur=model.input.client.name;renderOrg(model.input.org);orgState(`${model.input.org.at||""} 기준 웹 검색 요약입니다. 사실 여부는 출처에서 확인하세요.`)}
+  applyTheme(aiTheme&&r.form&&r.form.cPreset==="ai"?aiTheme:(r.theme||theme));render();
+  $("sampleBadge").hidden=true;setStep(2);["htmlBtn","pptBtn","pdfBtn","editBtn"].forEach(k=>$(k).disabled=false);renderHistory();
+  status(`'${r.client}' 제안서(${fmtAt(r.at)} 저장)를 불러왔습니다. 문구 편집 후 HTML·PPT·PDF로 저장할 수 있습니다.`)}
+$("histExport").onclick=()=>{const a=hGet();if(!a.length){toast("내보낼 제안서가 없습니다.");return}
+  saveFile(`닥터빌_제안서_저장본_${today().replace(/-/g,"")}.json`,new Blob([JSON.stringify({kind:"drville-proposals",v:1,items:a},null,1)],{type:"application/json"}))};
+$("histImport").onclick=()=>$("histFile").click();
+$("histFile").onchange=()=>{const f=$("histFile").files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);const items=(o&&o.kind==="drville-proposals"&&Array.isArray(o.items))?o.items:null;
+    if(!items)throw 0;const a=hGet();let n=0;for(const it of items){if(!it||!it.id||!it.model||!it.model.input)continue;const i=a.findIndex(x=>x.id===it.id);if(i>=0)a.splice(i,1);a.push(it);n++}
+    a.sort((x,y)=>String(y.at).localeCompare(String(x.at)));if(a.length>30)a.length=30;hSet(a);renderHistory();$("histBox").open=true;toast(`제안서 ${n}개를 불러왔습니다.`)}
+  catch(e){toast("닥터빌 제안서 저장 파일이 아닙니다.")}$("histFile").value=""};rd.readAsText(f)};
+
+/* ---------- 문구 편집 (미리보기에서 바로 수정) ---------- */
+let editing=false;
+function setPath(o,path,v){const ks=path.split(".");let t=o;for(let i=0;i<ks.length-1;i++){if(t==null)return;t=t[ks[i]]}if(t!=null)t[ks[ks.length-1]]=v}
+function setEditing(on){editing=!!on&&!!model;const pv=$("preview");pv.classList.toggle("editing",editing);$("editTip").hidden=!editing;
+  const b=$("editBtn");b.classList.toggle("on",editing);b.textContent=editing?"편집 완료":"문구 편집";
+  pv.querySelectorAll("[data-ed]").forEach(el=>{if(editing){try{el.contentEditable="plaintext-only"}catch(e){el.contentEditable="true"}if(el.contentEditable!=="plaintext-only")el.contentEditable="true";el.spellcheck=false}else el.removeAttribute("contenteditable")});
+  if(!on&&model){render();saveHistory()}}
+$("editBtn").onclick=()=>setEditing(!editing);
+$("preview").addEventListener("input",e=>{const el=e.target.closest&&e.target.closest("[data-ed]");if(!editing||!el||!model)return;
+  setPath(model,el.dataset.ed,el.textContent.replace(/\s+/g," ").trim());model.edited=true;saveSoon()});
+$("preview").addEventListener("keydown",e=>{if(editing&&e.key==="Enter"&&e.target.closest&&e.target.closest("[data-ed]")){e.preventDefault();e.target.blur()}});
+$("preview").addEventListener("click",e=>{if(editing&&e.target.closest&&e.target.closest("a"))e.preventDefault()});
+renderHistory();
 
 /* ---------- 기관 정보 · 접근 코드 ---------- */
 $("cName").addEventListener("change",()=>lookupOrg(false));$("orgBtn").onclick=()=>lookupOrg(true);
